@@ -1,65 +1,103 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
 
-class SepetPage extends StatefulWidget {
-  final Cart cart;
+class SepetPage extends StatelessWidget {
+  const SepetPage({super.key});
 
-  SepetPage({required this.cart});
-
-  @override
-  State<SepetPage> createState() => _SepetPageState();
-}
-
-class _SepetPageState extends State<SepetPage> {
   @override
   Widget build(BuildContext context) {
-    final cart = widget.cart;
+    // Sepet ekranı, sepetteki ürünleri ve toplam fiyatı gösterir.
+    // Bu yüzden Cart değişince ekranın yenilenmesi gerekir: watch kullanıyoruz.
+    final cart = context.watch<Cart>();
 
     return Scaffold(
-      appBar: AppBar(title: Text("Sepetim")),
-
-      body: ListView.builder(
-        itemCount: cart.items.length,
-        itemBuilder: (context, index) {
-          final item = cart.items[index];
-
-          return ListTile(
-            title: Text(item.name),
-            subtitle: Text("${item.price} TL"),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      cart.decrease(item);
-                    });
-                  },
-                  icon: Icon(Icons.remove),
-                ),
-                Text(item.quantity.toString()),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      cart.increase(item);
-                    });
-                  },
-                  icon: Icon(Icons.add),
-                ),
-              ],
-            ),
-          );
-        },
+      backgroundColor: Colors.grey.shade100,
+      appBar: AppBar(
+        title: const Text("Sepetim"),
+        backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
       ),
 
+      body: cart.items.isEmpty
+          ? const Center(
+              child: Text(
+                "Sepetin boş",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: cart.items.length,
+              itemBuilder: (context, index) {
+                final item = cart.items[index];
+
+                return Card(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: Colors.teal,
+                      child: Icon(Icons.shopping_bag, color: Colors.white),
+                    ),
+                    title: Text(item.name),
+                    subtitle: Text("${item.price} TL"),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            cart.decrease(item);
+                          },
+                          icon: const Icon(Icons.remove_circle_outline),
+                        ),
+                        Text(
+                          item.quantity.toString(),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            cart.increase(item);
+                          },
+                          icon: const Icon(Icons.add_circle_outline),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+
       bottomNavigationBar: Container(
-        padding: EdgeInsets.all(16),
-        color: Colors.white,
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Ürün: ${cart.totalItems}"),
-            Text("Toplam: ${cart.totalPrice} TL"),
+            Text(
+              "Ürün: ${cart.totalItems}",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const Text("Toplam"),
+                Text(
+                  "${cart.totalPrice} TL",
+                  style: const TextStyle(
+                    color: Colors.teal,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
