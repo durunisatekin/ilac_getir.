@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/user_model.dart';
+import '../theme/app_colors.dart';
 import 'dashboard_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -21,17 +23,17 @@ class _RegisterPageState extends State<RegisterPage> {
     final user = context.read<UserModel>();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("Üye Ol"),
-        backgroundColor: Colors.teal,
+        backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const Icon(Icons.person_add, color: Colors.teal, size: 70),
+            const Icon(Icons.person_add, color: AppColors.primary, size: 70),
             const SizedBox(height: 20),
 
             TextField(
@@ -56,8 +58,16 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 12),
             TextField(
               keyboardType: TextInputType.phone,
+              // Sadece rakam yazılmasına izin verir.
+              // 11 haneden fazlasını yazdırmaz.
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(11),
+              ],
               decoration: const InputDecoration(
                 labelText: "Telefon",
+                hintText: "05xxxxxxxxx",
+                helperText: "Telefon numarası 0 ile başlamalıdır",
                 border: OutlineInputBorder(),
               ),
               onChanged: (value) {
@@ -81,7 +91,7 @@ class _RegisterPageState extends State<RegisterPage> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.all(14),
                 ),
@@ -93,6 +103,17 @@ class _RegisterPageState extends State<RegisterPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text("Lütfen tüm alanları doldur"),
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (phone.length != 11 || !phone.startsWith("0")) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Telefon 0 ile başlamalı ve 11 haneli olmalı",
+                        ),
                       ),
                     );
                     return;

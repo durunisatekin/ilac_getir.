@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'ilac_detay_page.dart';
 import '../models/cart_model.dart';
+import '../theme/app_colors.dart';
 
 class IlacListesi extends StatefulWidget {
   final String kategori;
@@ -170,10 +171,10 @@ class _IlacListesiState extends State<IlacListesi> {
     final baslik = kategoriBasligi();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text("$baslik İlaçları"),
-        backgroundColor: Colors.teal,
+        backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
       ),
       body: Column(
@@ -244,14 +245,14 @@ class _IlacListesiState extends State<IlacListesi> {
                       );
                     },
                     leading: const CircleAvatar(
-                      backgroundColor: Colors.teal,
+                      backgroundColor: AppColors.primary,
                       child: Icon(Icons.medication, color: Colors.white),
                     ),
                     title: Text(ilac["name"]),
                     subtitle: Text("${ilac["price"]} TL"),
                     trailing: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () {

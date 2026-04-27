@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
+import '../theme/app_colors.dart';
 
 class IlacDetayPage extends StatelessWidget {
   final Map<String, dynamic> ilac;
@@ -13,10 +14,10 @@ class IlacDetayPage extends StatelessWidget {
     final cart = context.read<Cart>();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(ilac["name"]),
-        backgroundColor: Colors.teal,
+        backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
       ),
       body: Padding(
@@ -28,7 +29,7 @@ class IlacDetayPage extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.teal,
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Icon(
@@ -46,7 +47,7 @@ class IlacDetayPage extends StatelessWidget {
             Text(
               "${ilac["price"]} TL",
               style: const TextStyle(
-                color: Colors.teal,
+                color: AppColors.primary,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -75,7 +76,7 @@ class IlacDetayPage extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.all(14),
                 ),

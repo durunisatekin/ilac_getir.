@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/user_model.dart';
+import '../theme/app_colors.dart';
 import 'dashboard_page.dart';
 import 'register_page.dart';
 
@@ -20,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
     final user = context.read<UserModel>();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -29,16 +31,16 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const SizedBox(height: 40),
               const Text(
-                "İlaç Getir",
+                "Dvita",
                 style: TextStyle(
-                  color: Colors.teal,
+                  color: AppColors.primary,
                   fontSize: 34,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
               const Text(
-                "Telefon numaranla giriş yap",
+                "İlaç kapında, hesabına giriş yap",
                 style: TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 30),
@@ -46,8 +48,16 @@ class _LoginPageState extends State<LoginPage> {
               // TextField kullanıcıdan yazı almak için kullanılır.
               TextField(
                 keyboardType: TextInputType.phone,
+                // Sadece rakam yazılmasına izin verir.
+                // 11 haneden fazlasını yazdırmaz.
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(11),
+                ],
                 decoration: const InputDecoration(
                   labelText: "Telefon",
+                  hintText: "05xxxxxxxxx",
+                  helperText: "Telefon numarası 0 ile başlamalıdır",
                   prefixIcon: Icon(Icons.phone),
                   border: OutlineInputBorder(),
                 ),
@@ -73,11 +83,22 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.all(14),
                   ),
                   onPressed: () async {
+                    if (phone.length != 11 || !phone.startsWith("0")) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Telefon 0 ile başlamalı ve 11 haneli olmalı",
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
                     final success = await user.login(phone, password);
 
                     if (success) {

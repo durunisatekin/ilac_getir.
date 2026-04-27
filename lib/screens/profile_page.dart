@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user_model.dart';
+import '../theme/app_colors.dart';
 import 'login_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -11,10 +12,10 @@ class ProfilePage extends StatelessWidget {
     final user = context.watch<UserModel>();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("Hesabım"),
-        backgroundColor: Colors.teal,
+        backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
       ),
       body: ListView(
@@ -23,7 +24,7 @@ class ProfilePage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.teal,
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -31,7 +32,7 @@ class ProfilePage extends StatelessWidget {
                 const CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, color: Colors.teal, size: 34),
+                  child: Icon(Icons.person, color: AppColors.primary, size: 34),
                 ),
                 const SizedBox(width: 14),
                 Column(
@@ -64,7 +65,10 @@ class ProfilePage extends StatelessWidget {
           for (final address in user.addresses)
             Card(
               child: ListTile(
-                leading: const Icon(Icons.location_on, color: Colors.teal),
+                leading: const Icon(
+                  Icons.location_on,
+                  color: AppColors.primary,
+                ),
                 title: Text(address),
               ),
             ),
@@ -78,7 +82,10 @@ class ProfilePage extends StatelessWidget {
           for (final order in user.oldOrders)
             Card(
               child: ListTile(
-                leading: const Icon(Icons.receipt_long, color: Colors.teal),
+                leading: const Icon(
+                  Icons.receipt_long,
+                  color: AppColors.primary,
+                ),
                 title: Text(order),
                 subtitle: const Text("Teslim edildi"),
               ),

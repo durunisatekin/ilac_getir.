@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
+import '../theme/app_colors.dart';
 
 class SepetPage extends StatelessWidget {
   const SepetPage({super.key});
@@ -12,10 +13,10 @@ class SepetPage extends StatelessWidget {
     final cart = context.watch<Cart>();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("Sepetim"),
-        backgroundColor: Colors.teal,
+        backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
       ),
 
@@ -39,7 +40,7 @@ class SepetPage extends StatelessWidget {
                   ),
                   child: ListTile(
                     leading: const CircleAvatar(
-                      backgroundColor: Colors.teal,
+                      backgroundColor: AppColors.primary,
                       child: Icon(Icons.shopping_bag, color: Colors.white),
                     ),
                     title: Text(item.name),
@@ -91,7 +92,7 @@ class SepetPage extends StatelessWidget {
                 Text(
                   "${cart.totalPrice} TL",
                   style: const TextStyle(
-                    color: Colors.teal,
+                    color: AppColors.primary,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),

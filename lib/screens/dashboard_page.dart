@@ -6,6 +6,7 @@ import 'profile_page.dart';
 import 'search_page.dart';
 import '../models/cart_model.dart';
 import '../models/user_model.dart';
+import '../theme/app_colors.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -61,10 +62,37 @@ class _DashboardPageState extends State<DashboardPage> {
     final cart = context.watch<Cart>();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("İlaç Getir"),
-        backgroundColor: Colors.teal,
+        toolbarHeight: 72,
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(
+                "assets/images/dvita_logo.png",
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Dvita",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "İlaç kapında",
+                  style: TextStyle(fontSize: 12, color: Colors.white70),
+                ),
+              ],
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
       ),
 
@@ -77,29 +105,50 @@ class _DashboardPageState extends State<DashboardPage> {
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.teal,
+              color: AppColors.navy,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Sağlık ürünleri kapında",
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  "İhtiyacın olan ürünleri hızlıca bul",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Dvita ile sağlık kapında",
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        "İhtiyacın olan ürünleri hızlıca bul",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        "Vitamin, mide, soğuk algınlığı ve daha fazlası.",
+                        style: TextStyle(color: Colors.white, fontSize: 15),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 12),
-                Text(
-                  "Vitamin, mide, soğuk algınlığı ve daha fazlası.",
-                  style: TextStyle(color: Colors.white, fontSize: 15),
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Image.asset(
+                    "assets/images/dvita_logo.png",
+                    width: 58,
+                    height: 58,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ],
             ),
@@ -113,7 +162,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade100,
+                      color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -126,10 +175,13 @@ class _DashboardPageState extends State<DashboardPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade100,
+                    color: AppColors.primaryLight,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.local_shipping, color: Colors.green),
+                  child: const Icon(
+                    Icons.local_shipping,
+                    color: AppColors.primaryDark,
+                  ),
                 ),
               ],
             ),
@@ -146,16 +198,14 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
 
-          // Kategori kartları: GridView ekranda 2 sütunlu kartlar oluşturur.
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(12),
+          // Ana sayfada kategorileri küçük tutuyoruz.
+          // Böylece ekran daha çok alışveriş uygulaması vitrini gibi görünür.
+          SizedBox(
+            height: 112,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               itemCount: kategoriler.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
               itemBuilder: (context, index) {
                 final kategori = kategoriler[index];
 
@@ -170,21 +220,31 @@ class _DashboardPageState extends State<DashboardPage> {
                   },
 
                   child: Container(
+                    width: 105,
+                    margin: const EdgeInsets.only(right: 10),
                     decoration: BoxDecoration(
-                      color: kategori["color"],
-                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(kategori["icon"], color: Colors.white, size: 36),
-                        const SizedBox(height: 10),
+                        CircleAvatar(
+                          backgroundColor: kategori["color"],
+                          child: Icon(
+                            kategori["icon"],
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
                         Text(
                           kategori["name"],
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 17,
-                            color: Colors.white,
+                            fontSize: 13,
+                            color: Colors.black87,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -193,6 +253,59 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 );
               },
+            ),
+          ),
+
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(12),
+              children: [
+                const Text(
+                  "Öne çıkanlar",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.health_and_safety,
+                          color: AppColors.primary,
+                          size: 34,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Günlük sağlık ihtiyaçları",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text("En çok tercih edilen ürünlere hızlıca ulaş."),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -212,11 +325,11 @@ class _DashboardPageState extends State<DashboardPage> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                Icon(Icons.home, color: Colors.teal),
+                Icon(Icons.home, color: AppColors.primary),
                 SizedBox(height: 4),
                 Text(
                   "Ana Sayfa",
-                  style: TextStyle(color: Colors.teal, fontSize: 12),
+                  style: TextStyle(color: AppColors.primary, fontSize: 12),
                 ),
               ],
             ),
