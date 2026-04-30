@@ -4,6 +4,7 @@ import 'package:ilac_getir/models/user_model.dart';
 import 'package:ilac_getir/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'screens/dashboard_page.dart';
+import 'screens/odeme_page.dart';
 import 'screens/sepet_page.dart';
 
 void main() {
@@ -46,7 +47,10 @@ class MyApp extends StatelessWidget {
           ),
         ),
         home: const DashboardPage(),
-        routes: {"/sepet": (_) => const SepetPage()},
+        routes: {
+          "/sepet": (_) => const SepetPage(),
+          "/odeme": (_) => const OdemePage(),
+        },
       ),
     );
   }

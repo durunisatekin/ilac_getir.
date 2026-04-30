@@ -16,12 +16,72 @@ class _RegisterPageState extends State<RegisterPage> {
   String name = "";
   String surname = "";
   String phone = "";
-  String password = "";
+  String smsCode = "";
+  bool smsSent = false;
+
+  bool get isPhoneValid => phone.length == 11 && phone.startsWith("0");
+
+  void sendSmsCode() {
+    if (name.trim().isEmpty || surname.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Lütfen isim ve soyisim alanlarını doldur"),
+        ),
+      );
+      return;
+    }
+
+    if (!isPhoneValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Telefon 0 ile başlamalı ve 11 haneli olmalı"),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      smsSent = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("$phone numarasına SMS kodu gönderildi")),
+    );
+  }
+
+  Future<void> register() async {
+    if (!smsSent) {
+      sendSmsCode();
+      return;
+    }
+
+    if (smsCode != UserModel.demoSmsCode) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("SMS kodu hatalı")));
+      return;
+    }
+
+    final user = context.read<UserModel>();
+
+    await user.register(
+      userName: name.trim(),
+      userSurname: surname.trim(),
+      userPhone: phone,
+      smsCode: smsCode,
+    );
+
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const DashboardPage()),
+      (route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final user = context.read<UserModel>();
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -35,7 +95,6 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             const Icon(Icons.person_add, color: AppColors.primary, size: 70),
             const SizedBox(height: 20),
-
             TextField(
               decoration: const InputDecoration(
                 labelText: "İsim",
@@ -58,8 +117,6 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 12),
             TextField(
               keyboardType: TextInputType.phone,
-              // Sadece rakam yazılmasına izin verir.
-              // 11 haneden fazlasını yazdırmaz.
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 LengthLimitingTextInputFormatter(11),
@@ -71,22 +128,31 @@ class _RegisterPageState extends State<RegisterPage> {
                 border: OutlineInputBorder(),
               ),
               onChanged: (value) {
-                phone = value;
+                setState(() {
+                  phone = value;
+                  smsSent = false;
+                  smsCode = "";
+                });
               },
             ),
             const SizedBox(height: 12),
-            TextField(
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: "Şifre",
-                border: OutlineInputBorder(),
+            if (smsSent)
+              TextField(
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                ],
+                decoration: const InputDecoration(
+                  labelText: "SMS Kodu",
+                  prefixIcon: Icon(Icons.sms_outlined),
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  smsCode = value;
+                },
               ),
-              onChanged: (value) {
-                password = value;
-              },
-            ),
             const SizedBox(height: 20),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -95,46 +161,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.all(14),
                 ),
-                onPressed: () async {
-                  if (name.isEmpty ||
-                      surname.isEmpty ||
-                      phone.isEmpty ||
-                      password.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Lütfen tüm alanları doldur"),
-                      ),
-                    );
-                    return;
-                  }
-
-                  if (phone.length != 11 || !phone.startsWith("0")) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          "Telefon 0 ile başlamalı ve 11 haneli olmalı",
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-
-                  await user.register(
-                    userName: name,
-                    userSurname: surname,
-                    userPhone: phone,
-                    userPassword: password,
-                  );
-
-                  if (!context.mounted) return;
-
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const DashboardPage()),
-                    (route) => false,
-                  );
-                },
-                child: const Text("Kaydol"),
+                onPressed: smsSent ? register : sendSmsCode,
+                child: Text(smsSent ? "Kaydol" : "SMS Kodu Gönder"),
               ),
             ),
           ],

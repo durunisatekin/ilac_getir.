@@ -8,8 +8,6 @@ class SepetPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sepet ekranı, sepetteki ürünleri ve toplam fiyatı gösterir.
-    // Bu yüzden Cart değişince ekranın yenilenmesi gerekir: watch kullanıyoruz.
     final cart = context.watch<Cart>();
 
     return Scaffold(
@@ -19,7 +17,6 @@ class SepetPage extends StatelessWidget {
         backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
       ),
-
       body: cart.items.isEmpty
           ? const Center(
               child: Text(
@@ -70,36 +67,76 @@ class SepetPage extends StatelessWidget {
                 );
               },
             ),
-
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Ürün: ${cart.totalItems}",
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const Text("Toplam"),
-                Text(
-                  "${cart.totalPrice} TL",
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Ürün: ${cart.totalItems}",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text("Toplam"),
+                      Text(
+                        "${cart.totalPrice.toStringAsFixed(2)} TL",
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text("Alışverişe Devam Et"),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: cart.items.isEmpty
+                          ? null
+                          : () {
+                              Navigator.pushNamed(context, "/odeme");
+                            },
+                      icon: const Icon(Icons.payment),
+                      label: const Text("Ödemeye Geç"),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

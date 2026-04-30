@@ -4,6 +4,7 @@ import 'ilac_listesi.dart';
 import 'login_page.dart';
 import 'profile_page.dart';
 import 'search_page.dart';
+import 'siparis_durum_page.dart';
 import '../models/cart_model.dart';
 import '../models/user_model.dart';
 import '../theme/app_colors.dart';
@@ -172,15 +173,40 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryLight,
+                Expanded(
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.local_shipping,
-                    color: AppColors.primaryDark,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SiparisDurumPage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.primaryLight),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.local_shipping,
+                            color: AppColors.primaryDark,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "Siparişimin durumu",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],

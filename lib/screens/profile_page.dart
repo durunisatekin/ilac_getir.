@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/user_model.dart';
 import '../theme/app_colors.dart';
 import 'login_page.dart';
+import 'recetelerim_page.dart';
+import 'siparis_durum_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -35,28 +37,29 @@ class ProfilePage extends StatelessWidget {
                   child: Icon(Icons.person, color: AppColors.primary, size: 34),
                 ),
                 const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${user.name} ${user.surname}",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${user.name} ${user.surname}",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text(
-                      user.phone,
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                  ],
+                      Text(
+                        user.phone,
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 14),
-
           const Text(
             "Kayıtlı Adreslerim",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -72,7 +75,44 @@ class ProfilePage extends StatelessWidget {
                 title: Text(address),
               ),
             ),
-
+          const SizedBox(height: 14),
+          const Text(
+            "Reçetelerim",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.receipt_long, color: AppColors.primary),
+              title: const Text("TC ile reçetelerimi görüntüle"),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RecetelerimPage()),
+                );
+              },
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(
+                Icons.local_shipping_outlined,
+                color: AppColors.primary,
+              ),
+              title: const Text("Siparişimin durumunu görüntüle"),
+              subtitle: const Text(
+                "Hazırlanıyor, yolda ve teslim aşamalarını takip et",
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SiparisDurumPage()),
+                );
+              },
+            ),
+          ),
           const SizedBox(height: 14),
           const Text(
             "Eski Siparişlerim",
@@ -90,7 +130,6 @@ class ProfilePage extends StatelessWidget {
                 subtitle: const Text("Teslim edildi"),
               ),
             ),
-
           const SizedBox(height: 20),
           OutlinedButton.icon(
             onPressed: () async {

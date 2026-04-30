@@ -39,121 +39,148 @@ class _IlacListesiState extends State<IlacListesi> {
       "name": "Parol",
       "price": 50.0,
       "type": "agri",
-      "description": "Ağrı kesici kategorisinde örnek bir üründür.",
+      "description":
+          "Ağrı kesici ve ateş düşürücü etkisiyle baş ağrısı, diş ağrısı, kas ağrıları ve ateşli durumların hafifletilmesinde kullanılır. Kullanım miktarı yaşa ve ihtiyaca göre değişebileceğinden, prospektüs bilgilerine veya uzman önerisine uygun şekilde tüketilmesi tavsiye edilir.",
     },
     {
       "name": "Dolven",
       "price": 60.0,
       "type": "agri",
-      "description": "Ağrı kesici kategorisinde örnek bir üründür.",
+      "description":
+          "Ağrı, ateş ve iltihap kaynaklı şikâyetlerin hafifletilmesinde kullanılan bu ilaç; baş ağrısı, diş ağrısı ve kas-eklem ağrılarında etkili olabilir. Önerilen kullanım şekli için yaşa uygun doz dikkate alınmalı ve prospektüs ya da uzman tavsiyesine göre kullanılmalıdır.",
     },
     {
       "name": "Arveles",
       "price": 80.0,
       "type": "agri",
-      "description": "Ağrı kesici kategorisinde örnek bir üründür.",
+      "description":
+          "Hızlı etki gösteren ağrı kesici özelliğiyle baş ağrısı, diş ağrısı, kas ağrıları ve çeşitli akut ağrıların hafifletilmesinde kullanılır. Kullanım dozu ve sıklığı için prospektüs bilgileri veya uzman önerisi doğrultusunda hareket edilmesi tavsiye edilir.",
     },
     {
       "name": "Majezik",
       "price": 70.0,
       "type": "agri",
-      "description": "Ağrı kesici kategorisinde örnek bir üründür.",
+      "description":
+          "Ağrı ve iltihap kaynaklı şikâyetlerin giderilmesinde kullanılan bu ilaç; boğaz ağrısı, kas-eklem ağrıları ve diş ağrısı gibi durumlarda rahatlama sağlayabilir. Kullanım şekli için önerilen doz dikkate alınmalı ve prospektüs ya da uzman tavsiyesine uygun hareket edilmelidir.",
     },
     {
       "name": "Ocean",
       "price": 70.0,
       "type": "vitamin",
-      "description": "Vitamin kategorisinde örnek bir üründür.",
+      "description":
+          "Günlük vitamin ve mineral ihtiyacını desteklemeye yardımcı olan bu takviye; enerji metabolizmasının normal işleyişine, bağışıklık sisteminin desteklenmesine ve genel vücut dengesinin korunmasına katkı sağlayabilir. Önerilen kullanım miktarı için ürün ambalajındaki talimatlar veya uzman önerisi dikkate alınmalıdır.",
     },
     {
       "name": "Solgar B12",
       "price": 200.0,
       "type": "vitamin",
-      "description": "Vitamin kategorisinde örnek bir üründür.",
+      "description":
+          "Vitamin B12 desteği sağlayan bu takviye; enerji oluşum metabolizmasını, sinir sisteminin normal işleyişini ve yorgunluk hissinin azalmasını desteklemeye yardımcı olabilir. Önerilen kullanım miktarı için ürün etiketindeki talimatlar veya uzman tavsiyesi dikkate alınmalıdır.",
     },
     {
       "name": "Supradyn",
       "price": 300.0,
       "type": "vitamin",
-      "description": "Vitamin kategorisinde örnek bir üründür.",
+      "description":
+          "Günlük vitamin ve mineral desteği sunan bu takviye; enerji seviyelerinin korunmasına, bağışıklık sisteminin desteklenmesine ve yoğun tempoda vücudun ihtiyaç duyduğu besin öğelerinin tamamlanmasına yardımcı olabilir. Kullanım miktarı için ürün ambalajındaki öneriler veya uzman tavsiyesi dikkate alınmalıdır.",
     },
     {
       "name": "Kiperin",
       "price": 500.0,
       "type": "vitamin",
-      "description": "Vitamin kategorisinde örnek bir üründür.",
+      "description":
+          "Vitamin, mineral ve özel içeriklerle günlük beslenme düzenini desteklemeye yardımcı olan bu takviye ürünleri; enerji seviyelerinin korunmasına, bağışıklık sisteminin desteklenmesine ve genel vücut dengesinin sürdürülmesine katkı sağlayabilir. Kullanım miktarı için ürün ambalajındaki talimatlar veya uzman önerisi dikkate alınmalıdır.",
     },
     {
       "name": "Rennie",
       "price": 150.0,
       "type": "mide",
-      "description": "Mide kategorisinde örnek bir üründür.",
+      "description":
+          "Mide yanması, hazımsızlık ve reflüye bağlı mide asidi şikâyetlerinin hafifletilmesine yardımcı olan bu ilaç, fazla mide asidini nötralize ederek hızlı rahatlama sağlayabilir. Kullanım miktarı için prospektüs bilgileri veya uzman önerisi dikkate alınmalıdır.",
     },
     {
       "name": "Gaviscon",
       "price": 180.0,
       "type": "mide",
-      "description": "Mide kategorisinde örnek bir üründür.",
+      "description":
+          "Mide yanması, reflü ve hazımsızlık kaynaklı şikâyetlerin hafifletilmesine yardımcı olan bu ilaç, mide içeriğinin yemek borusuna kaçışını azaltarak rahatlama sağlayabilir. Kullanım miktarı için prospektüs bilgileri veya uzman önerisi dikkate alınmalıdır.",
     },
     {
       "name": "Lansor",
       "price": 220.0,
       "type": "mide",
-      "description": "Mide kategorisinde örnek bir üründür.",
+      "description":
+          "Mide asidini azaltmaya yardımcı olan bu ilaç; reflü, mide yanması ve mide ülseri gibi asit kaynaklı şikâyetlerin tedavisinde kullanılabilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi doğrultusunda hareket edilmesi tavsiye edilir.",
     },
     {
-      "name": "Omeprol",
+      "name": "Omeprazol",
       "price": 240.0,
       "type": "mide",
-      "description": "Mide kategorisinde örnek bir üründür.",
+      "description":
+          "Mide asidi üretimini azaltmaya yardımcı olan bu ilaç; reflü, mide yanması ve mide ülseri gibi asit kaynaklı rahatsızlıkların tedavisinde kullanılabilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi doğrultusunda hareket edilmesi tavsiye edilir.",
     },
     {
       "name": "Parafon",
       "price": 90.0,
       "type": "kas",
-      "description": "Kas gevşetici kategorisinde örnek bir üründür.",
+      "description":
+          "Kas spazmları ve buna bağlı gelişen ağrıların hafifletilmesine yardımcı olan bu ilaç, kas gevşetici ve ağrı kesici etkisiyle rahatlama sağlayabilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi dikkate alınmalıdır.",
     },
     {
       "name": "Cabral",
       "price": 240.0,
       "type": "kas",
-      "description": "Kas gevşetici kategorisinde örnek bir üründür.",
+      "description":
+          "Kas spazmları, kas tutulmaları ve buna bağlı ağrıların hafifletilmesine yardımcı olan bu ilaç, kas gevşetici etkisiyle hareket konforunun artmasına destek olabilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi doğrultusunda hareket edilmesi tavsiye edilir.",
     },
     {
       "name": "Lioresal",
       "price": 240.0,
       "type": "kas",
-      "description": "Kas gevşetici kategorisinde örnek bir üründür.",
+      "description":
+          "Kas spazmları ve kaslarda oluşan sertlik hissinin azaltılmasına yardımcı olan bu ilaç, kas gevşetici etkisiyle hareket kabiliyetini destekleyebilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi dikkate alınmalıdır.",
     },
     {
       "name": "Tizanidin",
       "price": 240.0,
       "type": "kas",
-      "description": "Kas gevşetici kategorisinde örnek bir üründür.",
+      "description":
+          "Kas spazmları, kas sertliği ve buna bağlı gelişen ağrıların hafifletilmesine yardımcı olan bu ilaç, kas gevşetici etkisiyle rahatlama sağlayabilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi doğrultusunda hareket edilmesi tavsiye edilir.",
     },
     {
       "name": "Aferin",
       "price": 170.0,
       "type": "soguk",
-      "description": "Soğuk algınlığı kategorisinde örnek bir üründür.",
+      "description":
+          "Soğuk algınlığı ve grip belirtilerinin hafifletilmesine yardımcı olan bu ilaç; ateş, baş ağrısı, burun akıntısı ve halsizlik gibi şikâyetlerde rahatlama sağlayabilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi dikkate alınmalıdır.",
     },
     {
       "name": "Tylol Hot",
       "price": 40.0,
       "type": "soguk",
-      "description": "Soğuk algınlığı kategorisinde örnek bir üründür.",
+      "description":
+          "Soğuk algınlığı ve grip belirtilerinin hafifletilmesine yardımcı olan bu ilaç; ateş, baş ağrısı, burun tıkanıklığı ve halsizlik gibi şikâyetlerde rahatlama sağlayabilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi doğrultusunda hareket edilmesi tavsiye edilir.",
     },
     {
       "name": "Gripin",
       "price": 60.0,
       "type": "soguk",
-      "description": "Soğuk algınlığı kategorisinde örnek bir üründür.",
+      "description":
+          "Soğuk algınlığı ve grip belirtilerinin hafifletilmesine yardımcı olan bu ilaç; ateş, baş ağrısı, burun tıkanıklığı ve halsizlik gibi şikâyetlerde rahatlama sağlayabilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi doğrultusunda hareket edilmesi tavsiye edilir.",
     },
     {
       "name": "İbuCold",
       "price": 130.0,
       "type": "soguk",
-      "description": "Soğuk algınlığı kategorisinde örnek bir üründür.",
+      "description":
+          "Soğuk algınlığı ve grip belirtilerinin hafifletilmesine yardımcı olan bu ilaç; ateş, baş ağrısı, halsizlik ve burun akıntısı gibi şikâyetlerde rahatlama sağlayabilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi dikkate alınmalıdır.",
+    },
+    {
+      "name": "Coldaway",
+      "price": 120.0,
+      "type": "soguk",
+      "description":
+          "Soğuk algınlığı ve grip belirtilerinin hafifletilmesine yardımcı olan bu ilaç; ateş, baş ağrısı, burun tıkanıklığı ve halsizlik gibi şikâyetlerde rahatlama sağlayabilir. Kullanım şekli ve dozu için prospektüs bilgileri veya uzman önerisi dikkate alınmalıdır.",
     },
   ];
 
