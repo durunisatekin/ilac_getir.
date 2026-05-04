@@ -13,12 +13,42 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
   String phone = "";
   String smsCode = "";
   bool smsSent = false;
 
+  late final AnimationController controller;
+  late final Animation<Offset> slideAnimation;
+  late final Animation<double> fadeAnimation;
+
   bool get isPhoneValid => phone.length == 11 && phone.startsWith("0");
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+
+    slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.18),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
+
+    fadeAnimation = Tween<double>(begin: 0, end: 1).animate(controller);
+
+    controller.forward();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   void sendSmsCode() {
     if (!isPhoneValid) {
@@ -69,88 +99,111 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              const Text(
-                "Dvita",
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                "İlaç kapında, telefonunla giriş yap",
-                style: TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 30),
-              TextField(
-                keyboardType: TextInputType.phone,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(11),
+          child: FadeTransition(
+            opacity: fadeAnimation,
+            child: SlideTransition(
+              position: slideAnimation,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 34),
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Image.asset(
+                        "assets/images/dvita_logo.png",
+                        width: 108,
+                        height: 108,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    "Dvita",
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 34,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "İlaç kapında, telefonunla giriş yap",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 30),
+                  TextField(
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(11),
+                    ],
+                    decoration: const InputDecoration(
+                      labelText: "Telefon",
+                      hintText: "05xxxxxxxxx",
+                      prefixIcon: Icon(Icons.phone),
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        phone = value;
+                        smsSent = false;
+                        smsCode = "";
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child: smsSent
+                        ? TextField(
+                            key: const ValueKey("sms"),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(4),
+                            ],
+                            decoration: const InputDecoration(
+                              labelText: "SMS Kodu",
+                              prefixIcon: Icon(Icons.sms_outlined),
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (value) {
+                              smsCode = value;
+                            },
+                          )
+                        : const SizedBox(key: ValueKey("empty")),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(14),
+                      ),
+                      onPressed: smsSent ? login : sendSmsCode,
+                      child: Text(smsSent ? "Giriş Yap" : "SMS Kodu Gönder"),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const RegisterPage(),
+                          ),
+                        );
+                      },
+                      child: const Text("Üye Ol"),
+                    ),
+                  ),
                 ],
-                decoration: const InputDecoration(
-                  labelText: "Telefon",
-                  hintText: "05xxxxxxxxx",
-                  prefixIcon: Icon(Icons.phone),
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    phone = value;
-                    smsSent = false;
-                    smsCode = "";
-                  });
-                },
               ),
-              const SizedBox(height: 14),
-              if (smsSent)
-                TextField(
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(4),
-                  ],
-                  decoration: const InputDecoration(
-                    labelText: "SMS Kodu",
-                    prefixIcon: Icon(Icons.sms_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (value) {
-                    smsCode = value;
-                  },
-                ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.all(14),
-                  ),
-                  onPressed: smsSent ? login : sendSmsCode,
-                  child: Text(smsSent ? "Giriş Yap" : "SMS Kodu Gönder"),
-                ),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const RegisterPage()),
-                    );
-                  },
-                  child: const Text("Üye Ol"),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

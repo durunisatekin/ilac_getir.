@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cart_model.dart';
 import '../theme/app_colors.dart';
 import 'siparis_durum_page.dart';
@@ -19,15 +21,24 @@ class _OdemePageState extends State<OdemePage> {
   String seciliOdeme = "kart";
   String hataMesaji = "";
 
-  void odemeyiTamamla() {
+  Future<void> odemeyiTamamla() async {
+    final cart = context.read<Cart>();
+
+    if (cart.items.isEmpty) {
+      setState(() {
+        hataMesaji = "Sepetiniz boş";
+      });
+      return;
+    }
+
     String girilenKart = kartController.text.replaceAll(" ", "");
     String girilenTarih = tarihController.text;
     String girilenCvv = cvvController.text;
 
     if (seciliOdeme == "kart" &&
-        (girilenKart != "2424242424242424" ||
-            girilenTarih != "05/30" ||
-            girilenCvv != "244")) {
+        (girilenKart != "5858585858585858" ||
+            girilenTarih != "05/20" ||
+            girilenCvv != "588")) {
       setState(() {
         hataMesaji = "Kart bilgilerini kontrol ediniz";
       });
@@ -35,6 +46,23 @@ class _OdemePageState extends State<OdemePage> {
       setState(() {
         hataMesaji = "";
       });
+
+      final prefs = await SharedPreferences.getInstance();
+      final siparisNo = DateTime.now().millisecondsSinceEpoch.toString();
+      List<String> siparisUrunleri = [];
+
+      for (final item in cart.items) {
+        siparisUrunleri.add("${item.name} x${item.quantity}");
+      }
+
+      await prefs.setString("siparisNo", siparisNo);
+      await prefs.setInt("siparisZamani", DateTime.now().millisecondsSinceEpoch);
+      await prefs.setStringList("siparisUrunleri", siparisUrunleri);
+      await prefs.setDouble("siparisToplam", cart.totalPrice);
+
+      cart.clear();
+
+      if (!mounted) return;
 
       Navigator.pushReplacement(
         context,
@@ -134,9 +162,14 @@ class _OdemePageState extends State<OdemePage> {
                   TextField(
                     controller: kartController,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(16),
+                      KartNumarasiFormatter(),
+                    ],
                     decoration: const InputDecoration(
                       labelText: "Kart Numarası",
-                      hintText: "Kart numaranızı giriniz",
+                      hintText: "5858 5858 5858 5858",
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -147,9 +180,14 @@ class _OdemePageState extends State<OdemePage> {
                         child: TextField(
                           controller: tarihController,
                           keyboardType: TextInputType.datetime,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(4),
+                            TarihFormatter(),
+                          ],
                           decoration: const InputDecoration(
                             labelText: "Tarih",
-                            hintText: "AA/YY",
+                            hintText: "05/20",
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -159,9 +197,13 @@ class _OdemePageState extends State<OdemePage> {
                         child: TextField(
                           controller: cvvController,
                           keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(3),
+                          ],
                           decoration: const InputDecoration(
                             labelText: "CVV",
-                            hintText: "CVV",
+                            hintText: "588",
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -211,6 +253,49 @@ class _OdemePageState extends State<OdemePage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class KartNumarasiFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String rakamlar = newValue.text.replaceAll(" ", "");
+    String yeniYazi = "";
+
+    for (int i = 0; i < rakamlar.length; i++) {
+      if (i != 0 && i % 4 == 0) {
+        yeniYazi += " ";
+      }
+
+      yeniYazi += rakamlar[i];
+    }
+
+    return TextEditingValue(
+      text: yeniYazi,
+      selection: TextSelection.collapsed(offset: yeniYazi.length),
+    );
+  }
+}
+
+class TarihFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String rakamlar = newValue.text.replaceAll("/", "");
+
+    if (rakamlar.length > 2) {
+      rakamlar = "${rakamlar.substring(0, 2)}/${rakamlar.substring(2)}";
+    }
+
+    return TextEditingValue(
+      text: rakamlar,
+      selection: TextSelection.collapsed(offset: rakamlar.length),
     );
   }
 }

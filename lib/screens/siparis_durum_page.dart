@@ -1,11 +1,110 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../theme/app_colors.dart';
 
-class SiparisDurumPage extends StatelessWidget {
+class SiparisDurumPage extends StatefulWidget {
   const SiparisDurumPage({super.key});
 
   @override
+  State<SiparisDurumPage> createState() => _SiparisDurumPageState();
+}
+
+class _SiparisDurumPageState extends State<SiparisDurumPage> {
+  Timer? timer;
+  bool yukleniyor = true;
+
+  String siparisNo = "";
+  DateTime? siparisZamani;
+  List<String> siparisUrunleri = [];
+  double siparisToplam = 0;
+
+  final List<Map<String, dynamic>> adimlar = [
+    {
+      "icon": Icons.receipt_long,
+      "title": "Sipariş alındı",
+      "detail": "Ödeme ve sipariş bilgileri kaydedildi.",
+    },
+    {
+      "icon": Icons.inventory_2_outlined,
+      "title": "Sipariş hazırlanıyor",
+      "detail": "Ürünler eczane tarafından hazırlanıyor.",
+    },
+    {
+      "icon": Icons.assignment_turned_in_outlined,
+      "title": "Sipariş kargoya teslim edildi",
+      "detail": "Paket kuryeye teslim edildi.",
+    },
+    {
+      "icon": Icons.local_shipping_outlined,
+      "title": "Sipariş yola çıktı",
+      "detail": "Kurye adresinize doğru ilerliyor.",
+    },
+    {
+      "icon": Icons.home_outlined,
+      "title": "Sipariş teslim edildi",
+      "detail": "Paket adresinize ulaştı.",
+    },
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    siparisiGetir();
+
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {});
+    });
+  }
+
+  Future<void> siparisiGetir() async {
+    final prefs = await SharedPreferences.getInstance();
+    final kayitliZaman = prefs.getInt("siparisZamani");
+
+    setState(() {
+      siparisNo = prefs.getString("siparisNo") ?? "";
+      siparisUrunleri = prefs.getStringList("siparisUrunleri") ?? [];
+      siparisToplam = prefs.getDouble("siparisToplam") ?? 0;
+
+      if (kayitliZaman != null) {
+        siparisZamani = DateTime.fromMillisecondsSinceEpoch(kayitliZaman);
+      }
+
+      yukleniyor = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  int aktifAdimBul() {
+    if (siparisZamani == null) return 0;
+
+    int gecenDakika = DateTime.now().difference(siparisZamani!).inMinutes;
+
+    if (gecenDakika <= 0) {
+      return 0;
+    } else if (gecenDakika == 1) {
+      return 1;
+    } else if (gecenDakika == 2) {
+      return 2;
+    } else if (gecenDakika == 3) {
+      return 3;
+    } else {
+      return 4;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    int aktifAdim = aktifAdimBul();
+    Map<String, dynamic> simdikiAdim = adimlar[aktifAdim];
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -13,83 +112,156 @@ class SiparisDurumPage extends StatelessWidget {
         backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.primaryLight),
-            ),
-            child: const Row(
+      body: yukleniyor
+          ? const Center(child: CircularProgressIndicator())
+          : siparisZamani == null
+          ? _bosSiparis()
+          : ListView(
+              padding: const EdgeInsets.all(20),
               children: [
-                CircleAvatar(
-                  backgroundColor: AppColors.primaryLight,
-                  child: Icon(
-                    Icons.inventory_2_outlined,
-                    color: AppColors.primary,
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.primaryLight),
                   ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        "Siparişiniz hazırlanıyor",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      CircleAvatar(
+                        backgroundColor: AppColors.primaryLight,
+                        child: Icon(
+                          simdikiAdim["icon"],
+                          color: AppColors.primary,
                         ),
                       ),
-                      SizedBox(height: 4),
-                      Text("Tahmini teslimat: 30-45 dakika"),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              simdikiAdim["title"],
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(siparisUrunleri.join(", ")),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Sipariş No: $siparisNo",
+                              style: const TextStyle(color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _siparisOzeti(),
+                const SizedBox(height: 24),
+                for (int i = 0; i < adimlar.length; i++)
+                  siparisAdimi(
+                    icon: adimlar[i]["icon"],
+                    title: adimlar[i]["title"],
+                    detail: adimlar[i]["detail"],
+                    active: i <= aktifAdim,
+                    current: i == aktifAdim,
+                  ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: anaSayfayaDon,
+                    child: const Text("Ana Sayfaya Dön"),
                   ),
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _siparisOzeti() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Sipariş İçeriği",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 24),
-          siparisAdimi(
-            icon: Icons.receipt_long,
-            title: "Sipariş alındı",
-            detail: "Ödeme ve sipariş bilgileri kaydedildi.",
-            active: true,
-          ),
-          siparisAdimi(
-            icon: Icons.inventory_2_outlined,
-            title: "Sipariş hazırlanıyor",
-            detail: "Ürünlerin eczane tarafından hazırlanıyor.",
-            active: true,
-          ),
-          siparisAdimi(
-            icon: Icons.local_shipping_outlined,
-            title: "Sipariş yolda",
-            detail: "Kurye paketi teslim aldığında bu adım aktif olur.",
-            active: false,
-          ),
-          siparisAdimi(
-            icon: Icons.home_outlined,
-            title: "Sipariş teslim edildi",
-            detail: "Paket adresine ulaştığında sipariş tamamlanır.",
-            active: false,
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.popUntil(context, (route) => route.isFirst);
-              },
-              child: const Text("Ana Sayfaya Dön"),
+          const SizedBox(height: 8),
+          for (final urun in siparisUrunleri)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(urun),
             ),
+          const Divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Toplam",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "${siparisToplam.toStringAsFixed(2)} TL",
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  Widget _bosSiparis() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.local_shipping_outlined,
+              color: AppColors.primary,
+              size: 56,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              "Aktif sipariş bulunamadı",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "Ödeme tamamlandığında siparişiniz burada takip edilebilir.",
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 18),
+            ElevatedButton(
+              onPressed: anaSayfayaDon,
+              child: const Text("Ana Sayfaya Dön"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void anaSayfayaDon() {
+    Navigator.popUntil(context, (route) => route.isFirst);
   }
 
   static Widget siparisAdimi({
@@ -97,6 +269,7 @@ class SiparisDurumPage extends StatelessWidget {
     required String title,
     required String detail,
     required bool active,
+    required bool current,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -119,13 +292,27 @@ class SiparisDurumPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: active ? FontWeight.bold : FontWeight.normal,
-                    color: active ? Colors.black : Colors.black54,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: active
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: active ? Colors.black : Colors.black54,
+                        ),
+                      ),
+                    ),
+                    if (current)
+                      const Icon(
+                        Icons.radio_button_checked,
+                        color: AppColors.primary,
+                        size: 18,
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(detail, style: const TextStyle(color: Colors.black54)),

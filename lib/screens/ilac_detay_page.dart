@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
+import '../models/favorite_model.dart';
 import '../theme/app_colors.dart';
 
 class IlacDetayPage extends StatelessWidget {
@@ -10,15 +11,22 @@ class IlacDetayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // read kullanıyoruz çünkü burada sadece butona basınca sepete ekleme yapacağız.
     final cart = context.read<Cart>();
+    final favorites = context.watch<FavoriteModel>();
+    final isFavorite = favorites.isFavorite(ilac["name"]);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(ilac["name"]),
-        backgroundColor: AppColors.navy,
-        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: () {
+              favorites.toggleFavorite(ilac["name"]);
+            },
+            icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -32,11 +40,7 @@ class IlacDetayPage extends StatelessWidget {
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(
-                Icons.medication,
-                color: Colors.white,
-                size: 90,
-              ),
+              child: const Icon(Icons.medication, color: Colors.white, size: 90),
             ),
             const SizedBox(height: 20),
             Text(
@@ -75,14 +79,9 @@ class IlacDetayPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.all(14),
-                ),
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(14)),
                 onPressed: () {
                   cart.addItem(ilac["name"], ilac["price"]);
-
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Sepete eklendi")),
                   );

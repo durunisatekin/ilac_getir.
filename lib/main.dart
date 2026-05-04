@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:ilac_getir/models/cart_model.dart';
+import 'package:ilac_getir/models/favorite_model.dart';
 import 'package:ilac_getir/models/user_model.dart';
 import 'package:ilac_getir/theme/app_colors.dart';
 import 'package:provider/provider.dart';
-import 'screens/dashboard_page.dart';
 import 'screens/odeme_page.dart';
 import 'screens/sepet_page.dart';
+import 'screens/splash_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -17,16 +18,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // MultiProvider birden fazla Provider kullanmak içindir.
-    // Cart sepeti, UserModel ise kullanıcı bilgilerini tutar.
+    // Cart sepeti, UserModel kullanıcıyı, FavoriteModel favorileri tutar.
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => Cart()),
         ChangeNotifierProvider(create: (_) => UserModel()),
+        ChangeNotifierProvider(create: (_) => FavoriteModel()),
       ],
       child: MaterialApp(
         title: "Dvita",
         debugShowCheckedModeBanner: false,
-        // ThemeData uygulamanın genel renk ve buton tarzını belirler.
         theme: ThemeData(
           scaffoldBackgroundColor: AppColors.background,
           primaryColor: AppColors.primary,
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const DashboardPage(),
+        home: const SplashPage(),
         routes: {
           "/sepet": (_) => const SepetPage(),
           "/odeme": (_) => const OdemePage(),

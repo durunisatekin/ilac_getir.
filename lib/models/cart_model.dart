@@ -78,6 +78,12 @@ class Cart extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clear() {
+    items.clear();
+    saveCart();
+    notifyListeners();
+  }
+
   double get totalPrice {
     return items.fold(0, (sum, item) => sum + item.price * item.quantity);
   }
