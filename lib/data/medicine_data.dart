@@ -1,142 +1,124 @@
 import 'package:flutter/material.dart';
 
 final List<Map<String, dynamic>> medicineCategories = [
-  {"name": "Ağrı Kesici", "type": "agri", "color": Colors.red, "icon": Icons.healing},
-  {"name": "Vitamin", "type": "vitamin", "color": Colors.orange, "icon": Icons.local_pharmacy},
-  {"name": "Soğuk Algınlığı", "type": "soguk", "color": Colors.blue, "icon": Icons.ac_unit},
-  {"name": "Kas Gevşetici", "type": "kas", "color": Colors.pink, "icon": Icons.accessibility_new},
-  {"name": "Mide", "type": "mide", "color": Colors.green, "icon": Icons.medication},
-  {"name": "Diğer", "type": "diger", "color": Colors.purple, "icon": Icons.more_horiz},
+  {"name": "Ağrı Kesici", "type": "agri", "icon": Icons.healing},
+  {"name": "Vitamin", "type": "vitamin", "icon": Icons.local_pharmacy},
+  {"name": "Soğuk Algınlığı", "type": "soguk", "icon": Icons.ac_unit},
+  {"name": "Kas Gevşetici", "type": "kas", "icon": Icons.accessibility_new},
+  {"name": "Mide", "type": "mide", "icon": Icons.medication},
 ];
 
+Map<String, dynamic> _medicine(
+  String name,
+  String type,
+  double price,
+  String description,
+  String image,
+) {
+  return {
+    "name": name,
+    "type": type,
+    "price": price,
+    "description": description,
+    "image": "assets/images/medicines/$image",
+  };
+}
+
 final List<Map<String, dynamic>> medicines = [
-  {
-    "name": "Parol",
-    "price": 50.0,
-    "type": "agri",
-    "description": "Ağrı kesici ve ateş düşürücü olarak bilinen örnek bir üründür.",
-  },
-  {
-    "name": "Dolven",
-    "price": 60.0,
-    "type": "agri",
-    "description": "Ağrı, ateş ve iltihap şikayetlerinde kullanılan örnek bir üründür.",
-  },
-  {
-    "name": "Arveles",
-    "price": 80.0,
-    "type": "agri",
-    "description": "Hızlı etki gösteren ağrı kesici kategorisinde örnek bir üründür.",
-  },
-  {
-    "name": "Majezik",
-    "price": 70.0,
-    "type": "agri",
-    "description": "Boğaz, kas ve diş ağrısı gibi durumlarda bilinen örnek bir üründür.",
-  },
-  {
-    "name": "Ocean",
-    "price": 70.0,
-    "type": "vitamin",
-    "description": "Günlük vitamin desteği için listelenmiş örnek bir takviyedir.",
-  },
-  {
-    "name": "Solgar B12",
-    "price": 200.0,
-    "type": "vitamin",
-    "description": "B12 vitamini desteği için örnek bir takviye ürünüdür.",
-  },
-  {
-    "name": "Supradyn",
-    "price": 300.0,
-    "type": "vitamin",
-    "description": "Günlük vitamin ve mineral desteği için örnek bir üründür.",
-  },
-  {
-    "name": "Kiperin",
-    "price": 500.0,
-    "type": "vitamin",
-    "description": "Bağışıklık desteği alanında listelenmiş örnek bir takviyedir.",
-  },
-  {
-    "name": "Rennie",
-    "price": 150.0,
-    "type": "mide",
-    "description": "Mide yanması ve hazımsızlık alanında örnek bir üründür.",
-  },
-  {
-    "name": "Gaviscon",
-    "price": 180.0,
-    "type": "mide",
-    "description": "Reflü ve mide yanması için listelenmiş örnek bir üründür.",
-  },
-  {
-    "name": "Lansor",
-    "price": 220.0,
-    "type": "mide",
-    "description": "Mide asidi şikayetlerinde bilinen örnek bir üründür.",
-  },
-  {
-    "name": "Omeprazol",
-    "price": 240.0,
-    "type": "mide",
-    "description": "Mide asidi azaltma alanında örnek bir üründür.",
-  },
-  {
-    "name": "Parafon",
-    "price": 90.0,
-    "type": "kas",
-    "description": "Kas spazmı ve kas ağrısı alanında örnek bir üründür.",
-  },
-  {
-    "name": "Cabral",
-    "price": 240.0,
-    "type": "kas",
-    "description": "Kas gevşetici kategorisinde örnek bir üründür.",
-  },
-  {
-    "name": "Lioresal",
-    "price": 240.0,
-    "type": "kas",
-    "description": "Kas sertliği için listelenmiş örnek bir üründür.",
-  },
-  {
-    "name": "Tizanidin",
-    "price": 240.0,
-    "type": "kas",
-    "description": "Kas gevşetici kategorisinde örnek bir üründür.",
-  },
-  {
-    "name": "Aferin",
-    "price": 170.0,
-    "type": "soguk",
-    "description": "Soğuk algınlığı belirtileri için örnek bir üründür.",
-  },
-  {
-    "name": "Tylol Hot",
-    "price": 40.0,
-    "type": "soguk",
-    "description": "Grip ve soğuk algınlığı alanında örnek bir üründür.",
-  },
-  {
-    "name": "Gripin",
-    "price": 60.0,
-    "type": "soguk",
-    "description": "Soğuk algınlığı kategorisinde örnek bir üründür.",
-  },
-  {
-    "name": "İbuCold",
-    "price": 130.0,
-    "type": "soguk",
-    "description": "Burun akıntısı ve halsizlik gibi belirtiler için örnek üründür.",
-  },
+  _medicine("Parol", "agri", 79.0, "Ateş ve hafif-orta şiddetli ağrılarda kullanılan, Türkiye'de çok tanınan bir ağrı kesicidir.", "parol.png"),
+  _medicine("Aspirin", "agri", 64.0, "Ağrı kesici ve ateş düşürücü olarak bilinen yaygın bir üründür.", "aspirin.png"),
+  _medicine("Dolven", "agri", 88.0, "İbuprofen içeren, ağrı ve ateş şikayetlerinde sık tercih edilen bir üründür.", "dolven.jpg"),
+  _medicine("Arveles", "agri", 118.0, "Kısa süreli ağrıların giderilmesinde kullanılan bilinen bir ağrı kesicidir.", "arveles.jpg"),
+  _medicine("Majezik", "agri", 106.0, "Ağrı ve iltihap kaynaklı şikayetlerde kullanılan yaygın bir üründür.", "majezik.jpg"),
+  _medicine("Apranax Fort", "agri", 132.0, "Kas-iskelet ağrıları ve iltihaplı ağrılarda reçetelerde sık görülen bir üründür.", "apranax.png"),
+  _medicine("Minoset", "agri", 62.0, "Parasetamol içeren, ateş ve ağrı şikayetlerinde kullanılan tanınan bir üründür.", "minoset.png"),
+  _medicine("Vermidon", "agri", 74.0, "Ağrı ve ateş şikayetlerinde kullanılan, eczanelerde bilinen bir üründür.", "vermidon.png"),
+  _medicine("Novalgin", "agri", 92.0, "Ağrı ve ateş şikayetlerinde doktor önerisiyle kullanılan bilinen bir üründür.", "novalgin.jpg"),
+  _medicine("Etol Fort", "agri", 98.0, "Ağrı ve iltihap şikayetlerinde kullanılan, Türkiye'de satılan bir üründür.", "etol_fort.png"),
+  _medicine("Advil", "agri", 86.0, "İbuprofen içeren ve ağrı şikayetlerinde tercih edilen tanınan bir üründür.", "advil.jpg"),
+  _medicine("Dexofen", "agri", 90.0, "Deksketoprofen içeren, kısa süreli ağrılarda kullanılan bir üründür.", "dexofen.png"),
+  _medicine("Diclomec", "agri", 82.0, "Diklofenak içeren, ağrı ve iltihap şikayetlerinde kullanılan bir üründür.", "diclomec.png"),
+  _medicine("Dikloron", "agri", 84.0, "Ağrı ve iltihap durumlarında kullanılan, Türkiye'de bilinen bir üründür.", "dikloron.png"),
+  _medicine("Naprosyn", "agri", 128.0, "Naproksen içeren, ağrı ve iltihaplı durumlarda kullanılan bir üründür.", "naprosyn.png"),
+
+  _medicine("Supradyn", "vitamin", 210.0, "Vitamin ve mineral desteği için eczanelerde sık görülen takviye edici gıdadır.", "supradyn.webp"),
+  _medicine("Devit-3", "vitamin", 78.0, "D vitamini desteği amacıyla kullanılan, Türkiye'de yaygın bilinen bir üründür.", "devit_3.png"),
+  _medicine("Bemiks", "vitamin", 72.0, "B grubu vitaminleri içeren ve eczanelerde sık karşılaşılan bir üründür.", "bemiks.png"),
+  _medicine("Benexol B12", "vitamin", 118.0, "B vitamini desteği için kullanılan tanınan ürünlerden biridir.", "benexol_b12.png"),
+  _medicine("Decavit", "vitamin", 186.0, "Vitamin ve mineral desteği amacıyla kullanılan bir üründür.", "decavit.png"),
+  _medicine("Elevit", "vitamin", 260.0, "Vitamin-mineral desteği olarak eczanelerde bilinen bir üründür.", "elevit.jpg"),
+  _medicine("D-Colefor", "vitamin", 96.0, "D vitamini desteği için kullanılan, Türkiye'de satılan bir üründür.", "d_colefor.jpg"),
+  _medicine("Dodex", "vitamin", 84.0, "B12 vitamini desteği amacıyla kullanılan bilinen bir üründür.", "dodex.png"),
+  _medicine("Calcimax D3", "vitamin", 165.0, "Kalsiyum ve D vitamini desteği için kullanılan bir üründür.", "calcimax_d3.png"),
+  _medicine("Vitabiol C", "vitamin", 92.0, "C vitamini desteği için eczanelerde karşılaşılan bir üründür.", "vitabiol.jpg"),
+  _medicine("Folbiol", "vitamin", 74.0, "Folik asit desteği amacıyla kullanılan tanınan bir üründür.", "folbiol.png"),
+  _medicine("Ferro Sanol", "vitamin", 142.0, "Demir desteği için kullanılan ve eczanelerde bilinen bir üründür.", "ferro_sanol.png"),
+  _medicine("Maltofer Fol", "vitamin", 150.0, "Demir ve folik asit desteği amacıyla kullanılan bir üründür.", "maltofer.png"),
+  _medicine("Magnezinc", "vitamin", 126.0, "Magnezyum ve çinko desteği için kullanılan tanınan bir üründür.", "magnezinc.png"),
+  _medicine("Magnorm", "vitamin", 118.0, "Magnezyum desteği amacıyla eczanelerde satılan bir üründür.", "magnorm.jpg"),
+
+  _medicine("Nurofen Cold Flu", "soguk", 112.0, "Soğuk algınlığı belirtileri, ağrı ve ateş için kullanılan tanınan bir üründür.", "nurofen.png"),
+  _medicine("Aferin Forte", "soguk", 82.0, "Grip ve soğuk algınlığı belirtilerinde kullanılan bilinen ürünlerden biridir.", "aferin.png"),
+  _medicine("Tylol Hot", "soguk", 96.0, "Sıcak içecek şeklinde hazırlanan, soğuk algınlığı belirtileri için kullanılan bir üründür.", "tylol_hot.png"),
+  _medicine("Gripal", "soguk", 74.0, "Grip ve soğuk algınlığı dönemlerinde tanınan bir üründür.", "gripal.png"),
+  _medicine("İbuCold", "soguk", 104.0, "Burun tıkanıklığı, ağrı ve ateş gibi belirtilerde kullanılan bir üründür.", "ibucold.png"),
+  _medicine("Theraflu Forte", "soguk", 126.0, "Grip ve soğuk algınlığı belirtilerinde kullanılan eczane ürünlerinden biridir.", "theraflu.png"),
+  _medicine("Coldaway C", "soguk", 108.0, "Soğuk algınlığı belirtileri için kullanılan, Türkiye'de satılan bir üründür.", "coldaway_c.png"),
+  _medicine("Actifed", "soguk", 86.0, "Soğuk algınlığı ve burun akıntısı belirtilerinde kullanılan tanınan bir üründür.", "actifed.png"),
+  _medicine("Otrivine", "soguk", 98.0, "Burun tıkanıklığında kullanılan, eczanelerde sık görülen burun spreyidir.", "otrivine.png"),
+  _medicine("Peditus", "soguk", 92.0, "Soğuk algınlığı belirtilerinde kullanılan, Türkiye'de bilinen bir şuruptur.", "peditus.jpg"),
+  _medicine("Kloroben", "soguk", 118.0, "Boğaz ve ağız içi şikayetlerde kullanılan tanınan bir sprey üründür.", "kloroben.png"),
+  _medicine("Tantum Verde", "soguk", 125.0, "Boğaz bölgesi şikayetlerinde kullanılan eczane ürünlerinden biridir.", "tantum_verde.jpg"),
+  _medicine("İliadin", "soguk", 96.0, "Burun tıkanıklığında kullanılan, Türkiye'de bilinen burun spreyidir.", "iliadin.png"),
+  _medicine("Nasovine Duo", "soguk", 102.0, "Burun tıkanıklığı için kullanılan sprey ürünlerden biridir.", "nasovine.png"),
+  _medicine("Sinupret", "soguk", 136.0, "Sinüs ve soğuk algınlığı dönemlerinde eczanelerde görülen bir üründür.", "sinupret.jpg"),
+
+  _medicine("Voltaren Emulgel", "kas", 175.0, "Kas ve eklem ağrılarında bölgesel rahatlama için kullanılan tanınan bir jeldir.", "voltaren.png"),
+  _medicine("Parafon", "kas", 82.0, "Kas spazmı ve kas ağrısı şikayetlerinde kullanılan bilinen bir üründür.", "parafon.png"),
+  _medicine("Cabral", "kas", 78.0, "Kas gevşetici olarak reçetelerde sık karşılaşılan ürünlerden biridir.", "cabral.png"),
+  _medicine("Lioresal", "kas", 108.0, "Kas sertliği ve spazm şikayetlerinde kullanılan bilinen bir üründür.", "lioresal.jpg"),
+  _medicine("Muscoflex Duo", "kas", 145.0, "Kas ve eklem bölgesindeki ağrılar için kullanılan topikal ürünlerden biridir.", "muscoflex_duo.jpg"),
+  _medicine("Muscoril", "kas", 116.0, "Kas spazmı şikayetlerinde kullanılan, Türkiye'de bilinen bir üründür.", "muscoril.png"),
+  _medicine("Dikloron Jel", "kas", 95.0, "Kas ve eklem bölgesinde kullanılan diklofenak içerikli jel ürünüdür.", "dikloron_jel.jpg"),
+  _medicine("Fastjel", "kas", 128.0, "Kas ve eklem ağrılarında bölgesel kullanılan jel ürünlerden biridir.", "fastjel.png"),
+  _medicine("Dolgit", "kas", 112.0, "Kas ve eklem bölgesine uygulanan, eczanelerde bilinen bir kremdir.", "dolgit.png"),
+  _medicine("Profenid Jel", "kas", 118.0, "Bölgesel kas ve eklem ağrılarında kullanılan jel ürünlerden biridir.", "profenid.png"),
+  _medicine("Reparil Gel", "kas", 122.0, "Darbe ve bölgesel şişliklerde kullanılan, tanınan bir jel üründür.", "reparil.jpg"),
+  _medicine("Hirudoid Forte", "kas", 132.0, "Bölgesel morluk, şişlik ve yumuşak doku şikayetlerinde kullanılan bir kremdir.", "hirudoid.png"),
+  _medicine("Thermo Rheumon", "kas", 125.0, "Kas ve eklem bölgesine uygulanan, Türkiye'de satılan bir kremdir.", "thermo_rheumon.png"),
+  _medicine("Muskazon", "kas", 104.0, "Kas spazmı ve ağrılı kas şikayetlerinde kullanılan bilinen bir üründür.", "muskazon.png"),
+  _medicine("Miyorel", "kas", 98.0, "Kas gevşetici kategorisinde eczanelerde karşılaşılan ürünlerden biridir.", "miyorel.png"),
+
+  _medicine("Rennie", "mide", 95.0, "Mide yanması, hazımsızlık ve asit reflüsü şikayetlerinde kullanılan tanınan bir üründür.", "rennie.png"),
+  _medicine("Gaviscon", "mide", 138.0, "Reflü ve mide yanması şikayetlerinde Türkiye'de yaygın bilinen bir üründür.", "gaviscon.jpg"),
+  _medicine("Lansor", "mide", 84.0, "Mide asidiyle ilişkili şikayetlerde kullanılan, eczanelerde sık karşılaşılan bir üründür.", "lansor.png"),
+  _medicine("Nexium", "mide", 156.0, "Reflü ve mide asidi şikayetlerinde kullanılan tanınan mide ilaçlarından biridir.", "nexium.png"),
+  _medicine("Famodin", "mide", 76.0, "Mide asidiyle ilişkili şikayetlerde kullanılan bilinen ürünlerden biridir.", "famodin.jpg"),
+  _medicine("Protonex", "mide", 118.0, "Mide asidi ve reflü şikayetlerinde kullanılan bir üründür.", "protonex.png"),
+  _medicine("Pantpas", "mide", 104.0, "Mide asidiyle ilişkili şikayetlerde kullanılan, Türkiye'de satılan bir üründür.", "pantpas.png"),
+  _medicine("Panto", "mide", 98.0, "Pantoprazol içeren, mide asidi şikayetlerinde kullanılan bilinen bir üründür.", "panto.png"),
+  _medicine("Omeprol", "mide", 86.0, "Omeprazol içeren, reflü ve mide asidi şikayetlerinde kullanılan bir üründür.", "omeprol.png"),
+  _medicine("Antepsin", "mide", 120.0, "Mide ve sindirim sistemi şikayetlerinde kullanılan eczane ürünlerinden biridir.", "antepsin.png"),
+  _medicine("Motilium", "mide", 112.0, "Mide bulantısı ve sindirim sistemi şikayetlerinde kullanılan tanınan bir üründür.", "motilium.png"),
+  _medicine("Meteospasmyl", "mide", 126.0, "Gaz ve bağırsak spazmı şikayetlerinde kullanılan bilinen bir üründür.", "meteospasmyl.png"),
+  _medicine("Debridat Fort", "mide", 118.0, "Sindirim sistemi hareketleri ve bağırsak spazmı şikayetlerinde kullanılan bir üründür.", "debridat.png"),
+  _medicine("Buscopan", "mide", 94.0, "Karın ve mide-bağırsak spazmı şikayetlerinde kullanılan tanınan bir üründür.", "buscopan.png"),
+  _medicine("Pankreoflat", "mide", 132.0, "Sindirim ve gaz şikayetlerinde kullanılan, Türkiye'de satılan bir üründür.", "pankreoflat.png"),
 ];
 
 String categoryTitle(String type) {
-  final category = medicineCategories.firstWhere(
-    (item) => item["type"] == type,
-    orElse: () => medicineCategories.last,
-  );
-
-  return category["name"];
+  switch (type) {
+    case "agri":
+      return "Ağrı Kesici";
+    case "vitamin":
+      return "Vitamin";
+    case "soguk":
+      return "Soğuk Algınlığı";
+    case "kas":
+      return "Kas Gevşetici";
+    case "mide":
+      return "Mide";
+    default:
+      return "Diğer";
+  }
 }

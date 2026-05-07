@@ -37,10 +37,31 @@ class IlacDetayPage extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.primaryLight),
               ),
-              child: const Icon(Icons.medication, color: Colors.white, size: 90),
+              child: ilac["image"] != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        ilac["image"],
+                        height: 200,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.medication,
+                            color: AppColors.primaryDark,
+                            size: 90,
+                          );
+                        },
+                      ),
+                    )
+                  : const Icon(
+                      Icons.medication,
+                      color: AppColors.primaryDark,
+                      size: 90,
+                    ),
             ),
             const SizedBox(height: 20),
             Text(
@@ -79,7 +100,9 @@ class IlacDetayPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(14)),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(14),
+                ),
                 onPressed: () {
                   cart.addItem(ilac["name"], ilac["price"]);
                   ScaffoldMessenger.of(context).showSnackBar(

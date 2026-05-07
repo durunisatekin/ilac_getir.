@@ -18,19 +18,17 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     final filteredCategories = medicineCategories
         .where(
-          (category) => category["name"]
-              .toString()
-              .toLowerCase()
-              .contains(searchText.toLowerCase()),
+          (category) => category["name"].toString().toLowerCase().contains(
+            searchText.toLowerCase(),
+          ),
         )
         .toList();
 
     final filteredMedicines = medicines
         .where(
-          (medicine) => medicine["name"]
-              .toString()
-              .toLowerCase()
-              .contains(searchText.toLowerCase()),
+          (medicine) => medicine["name"].toString().toLowerCase().contains(
+            searchText.toLowerCase(),
+          ),
         )
         .toList();
 
@@ -128,10 +126,7 @@ class _MedicineResult extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const CircleAvatar(
-              backgroundColor: AppColors.primaryLight,
-              child: Icon(Icons.medication, color: AppColors.primaryDark),
-            ),
+            _MedicineImage(imagePath: medicine["image"]),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -154,6 +149,38 @@ class _MedicineResult extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MedicineImage extends StatelessWidget {
+  final String? imagePath;
+
+  const _MedicineImage({required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 58,
+      height: 58,
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.primaryLight),
+      ),
+      child: imagePath == null
+          ? const Icon(Icons.medication, color: AppColors.primaryDark)
+          : Image.asset(
+              imagePath!,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(
+                  Icons.medication,
+                  color: AppColors.primaryDark,
+                );
+              },
+            ),
     );
   }
 }

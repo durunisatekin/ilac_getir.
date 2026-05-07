@@ -26,10 +26,9 @@ class _IlacListesiState extends State<IlacListesi> {
 
     final filteredMedicines = medicines.where((medicine) {
       final sameCategory = medicine["type"] == widget.kategori;
-      final matchesSearch = medicine["name"]
-          .toString()
-          .toLowerCase()
-          .contains(search.toLowerCase());
+      final matchesSearch = medicine["name"].toString().toLowerCase().contains(
+        search.toLowerCase(),
+      );
 
       return sameCategory && matchesSearch;
     }).toList();
@@ -81,7 +80,10 @@ class _IlacListesiState extends State<IlacListesi> {
 
                 return Card(
                   color: Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   child: ListTile(
                     onTap: () {
                       Navigator.push(
@@ -91,10 +93,7 @@ class _IlacListesiState extends State<IlacListesi> {
                         ),
                       );
                     },
-                    leading: const CircleAvatar(
-                      backgroundColor: AppColors.primary,
-                      child: Icon(Icons.medication, color: Colors.white),
-                    ),
+                    leading: _MedicineImage(imagePath: medicine["image"]),
                     title: Text(medicine["name"]),
                     subtitle: Text("${medicine["price"]} TL"),
                     trailing: Wrap(
@@ -130,6 +129,38 @@ class _IlacListesiState extends State<IlacListesi> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MedicineImage extends StatelessWidget {
+  final String? imagePath;
+
+  const _MedicineImage({required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 58,
+      height: 58,
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.primaryLight),
+      ),
+      child: imagePath == null
+          ? const Icon(Icons.medication, color: AppColors.primaryDark)
+          : Image.asset(
+              imagePath!,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(
+                  Icons.medication,
+                  color: AppColors.primaryDark,
+                );
+              },
+            ),
     );
   }
 }

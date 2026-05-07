@@ -3,12 +3,10 @@ import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
 import '../models/user_model.dart';
 import '../theme/app_colors.dart';
-import 'duty_pharmacies_page.dart';
 import 'favorites_page.dart';
 import 'ilac_listesi.dart';
 import 'login_page.dart';
 import 'notifications_page.dart';
-import 'pharmacy_map_page.dart';
 import 'profile_page.dart';
 import 'search_page.dart';
 import 'siparis_durum_page.dart';
@@ -25,12 +23,42 @@ class _DashboardPageState extends State<DashboardPage> {
   int selectedCampaign = 0;
 
   final List<Map<String, dynamic>> kategoriler = [
-    {"name": "Ağrı Kesici", "type": "agri", "color": Colors.red, "icon": Icons.healing},
-    {"name": "Vitamin", "type": "vitamin", "color": Colors.orange, "icon": Icons.local_pharmacy},
-    {"name": "Soğuk Algınlığı", "type": "soguk", "color": Colors.blue, "icon": Icons.ac_unit},
-    {"name": "Kas Gevşetici", "type": "kas", "color": Colors.pink, "icon": Icons.accessibility_new},
-    {"name": "Mide", "type": "mide", "color": Colors.green, "icon": Icons.medication},
-    {"name": "Diğer", "type": "diger", "color": Colors.purple, "icon": Icons.more_horiz},
+    {
+      "name": "Ağrı Kesici",
+      "type": "agri",
+      "color": Colors.red,
+      "icon": Icons.healing,
+    },
+    {
+      "name": "Vitamin",
+      "type": "vitamin",
+      "color": Colors.orange,
+      "icon": Icons.local_pharmacy,
+    },
+    {
+      "name": "Soğuk Algınlığı",
+      "type": "soguk",
+      "color": Colors.blue,
+      "icon": Icons.ac_unit,
+    },
+    {
+      "name": "Kas Gevşetici",
+      "type": "kas",
+      "color": Colors.pink,
+      "icon": Icons.accessibility_new,
+    },
+    {
+      "name": "Mide",
+      "type": "mide",
+      "color": Colors.green,
+      "icon": Icons.medication,
+    },
+    {
+      "name": "Diğer",
+      "type": "diger",
+      "color": Colors.purple,
+      "icon": Icons.more_horiz,
+    },
   ];
 
   final List<Map<String, dynamic>> campaigns = [
@@ -87,8 +115,14 @@ class _DashboardPageState extends State<DashboardPage> {
             const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Dvita", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                Text("İlaç kapında", style: TextStyle(fontSize: 12, color: Colors.white70)),
+                Text(
+                  "Dvita",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "İlaç kapında",
+                  style: TextStyle(fontSize: 12, color: Colors.white70),
+                ),
               ],
             ),
           ],
@@ -109,7 +143,10 @@ class _DashboardPageState extends State<DashboardPage> {
               borderRadius: BorderRadius.circular(14),
               onTap: () => openPage(const SearchPage()),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 13,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
@@ -163,7 +200,10 @@ class _DashboardPageState extends State<DashboardPage> {
                             const SizedBox(height: 8),
                             Text(
                               campaign["text"],
-                              style: const TextStyle(color: Colors.white70, fontSize: 15),
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 15,
+                              ),
                             ),
                           ],
                         ),
@@ -183,7 +223,9 @@ class _DashboardPageState extends State<DashboardPage> {
                 height: 8,
                 margin: const EdgeInsets.only(top: 8, right: 5),
                 decoration: BoxDecoration(
-                  color: selectedCampaign == index ? AppColors.primary : Colors.black26,
+                  color: selectedCampaign == index
+                      ? AppColors.primary
+                      : Colors.black26,
                   borderRadius: BorderRadius.circular(20),
                 ),
               );
@@ -202,12 +244,14 @@ class _DashboardPageState extends State<DashboardPage> {
                 _QuickAction(
                   icon: Icons.map_outlined,
                   title: "Yakındaki Eczaneler",
-                  onTap: () => openPage(const PharmacyMapPage()),
+                  onTap: () =>
+                      Navigator.pushNamed(context, "/yakindaki-eczaneler"),
                 ),
                 _QuickAction(
                   icon: Icons.nightlight_round,
                   title: "Nöbetçi Eczaneler",
-                  onTap: () => openPage(const DutyPharmaciesPage()),
+                  onTap: () =>
+                      Navigator.pushNamed(context, "/nobetci-eczaneler"),
                 ),
                 _QuickAction(
                   icon: Icons.favorite_border,
@@ -239,7 +283,8 @@ class _DashboardPageState extends State<DashboardPage> {
                 final kategori = kategoriler[index];
 
                 return GestureDetector(
-                  onTap: () => openPage(IlacListesi(kategori: kategori["type"])),
+                  onTap: () =>
+                      openPage(IlacListesi(kategori: kategori["type"])),
                   child: Container(
                     width: 105,
                     margin: const EdgeInsets.only(right: 10),
@@ -253,13 +298,20 @@ class _DashboardPageState extends State<DashboardPage> {
                       children: [
                         CircleAvatar(
                           backgroundColor: kategori["color"],
-                          child: Icon(kategori["icon"], color: Colors.white, size: 22),
+                          child: Icon(
+                            kategori["icon"],
+                            color: Colors.white,
+                            size: 22,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           kategori["name"],
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -287,7 +339,11 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            const _BottomItem(icon: Icons.home, title: "Ana Sayfa", active: true),
+            const _BottomItem(
+              icon: Icons.home,
+              title: "Ana Sayfa",
+              active: true,
+            ),
             _BottomItem(
               icon: Icons.search_outlined,
               title: "Arama",
@@ -304,7 +360,9 @@ class _DashboardPageState extends State<DashboardPage> {
               title: "Hesabım",
               onTap: () {
                 final user = context.read<UserModel>();
-                openPage(user.isLoggedIn ? const ProfilePage() : const LoginPage());
+                openPage(
+                  user.isLoggedIn ? const ProfilePage() : const LoginPage(),
+                );
               },
             ),
           ],
@@ -344,7 +402,10 @@ class _QuickAction extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
             ),
           ],
@@ -371,7 +432,11 @@ class _FeaturedCard extends StatelessWidget {
           CircleAvatar(
             radius: 30,
             backgroundColor: AppColors.primaryLight,
-            child: Icon(Icons.health_and_safety, color: AppColors.primary, size: 34),
+            child: Icon(
+              Icons.health_and_safety,
+              color: AppColors.primary,
+              size: 34,
+            ),
           ),
           SizedBox(width: 12),
           Expanded(

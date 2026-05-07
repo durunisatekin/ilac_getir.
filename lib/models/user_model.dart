@@ -67,14 +67,14 @@ class UserModel extends ChangeNotifier {
 
   Future<bool> loginWithSms(String userPhone, String smsCode) async {
     if (smsCode != demoSmsCode) {
+      throw Exception("Hatalı SMS kodu");
+    }
+
+    // Eğer sistemdeki telefon girilenle eşleşmiyorsa veya isim henüz kaydedilmemişse üye değildir
+    if (phone != userPhone || name.isEmpty) {
       return false;
     }
 
-    phone = userPhone;
-    if (name.isEmpty && surname.isEmpty) {
-      name = "Dvita";
-      surname = "Kullanıcısı";
-    }
     isLoggedIn = true;
 
     _fillDemoProfileData();
@@ -86,6 +86,12 @@ class UserModel extends ChangeNotifier {
 
   Future<void> logout() async {
     isLoggedIn = false;
+    await saveUser();
+    notifyListeners();
+  }
+
+  Future<void> addOldOrder(String orderSummary) async {
+    oldOrders.add(orderSummary);
     await saveUser();
     notifyListeners();
   }

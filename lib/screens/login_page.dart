@@ -76,20 +76,70 @@ class _LoginPageState extends State<LoginPage>
     }
 
     final user = context.read<UserModel>();
-    final success = await user.loginWithSms(phone, smsCode);
+    try {
+      final success = await user.loginWithSms(phone, smsCode);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (success) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const DashboardPage()),
+      if (success) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const DashboardPage()),
+        );
+      } else {
+        _showRegisterWarning();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceAll("Exception: ", ""))),
       );
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("SMS kodu hatalı")));
     }
+  }
+
+  void _showRegisterWarning() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.info_outline,
+                    color: Colors.orange,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Lütfen üye olunuz",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Girdiğiniz numara ile kayıtlı bir kullanıcı bulunamadı. Devam etmek için lütfen önce üye olun.",
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 8,
+              top: 8,
+              child: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override

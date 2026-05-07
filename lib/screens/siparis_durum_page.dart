@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/user_model.dart';
 import '../theme/app_colors.dart';
 
 class SiparisDurumPage extends StatefulWidget {
@@ -15,6 +17,7 @@ class SiparisDurumPage extends StatefulWidget {
 class _SiparisDurumPageState extends State<SiparisDurumPage> {
   Timer? timer;
   bool yukleniyor = true;
+  bool siparisKaydedildi = false;
 
   String siparisNo = "";
   DateTime? siparisZamani;
@@ -55,6 +58,12 @@ class _SiparisDurumPageState extends State<SiparisDurumPage> {
     siparisiGetir();
 
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted &&
+          aktifAdimBul() == 4 &&
+          !siparisKaydedildi &&
+          siparisNo.isNotEmpty) {
+        _siparisTamamla();
+      }
       setState(() {});
     });
   }
@@ -80,6 +89,14 @@ class _SiparisDurumPageState extends State<SiparisDurumPage> {
   void dispose() {
     timer?.cancel();
     super.dispose();
+  }
+
+  void _siparisTamamla() {
+    final user = context.read<UserModel>();
+    String ozet =
+        "${siparisUrunleri.join(", ")} - ${siparisToplam.toStringAsFixed(2)} TL";
+    user.addOldOrder(ozet);
+    siparisKaydedildi = true;
   }
 
   int aktifAdimBul() {
