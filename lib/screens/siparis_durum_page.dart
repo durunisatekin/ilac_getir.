@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/user_model.dart';
 import '../theme/app_colors.dart';
+import '../widgets/empty_state.dart';
 
 class SiparisDurumPage extends StatefulWidget {
   const SiparisDurumPage({super.key});
@@ -244,35 +245,13 @@ class _SiparisDurumPageState extends State<SiparisDurumPage> {
   }
 
   Widget _bosSiparis() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.local_shipping_outlined,
-              color: AppColors.primary,
-              size: 56,
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              "Aktif sipariş bulunamadı",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "Ödeme tamamlandığında siparişiniz burada takip edilebilir.",
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 18),
-            ElevatedButton(
-              onPressed: anaSayfayaDon,
-              child: const Text("Ana Sayfaya Dön"),
-            ),
-          ],
-        ),
+    return EmptyState(
+      icon: Icons.local_shipping_outlined,
+      title: "Aktif sipariş bulunamadı",
+      message: "Ödeme tamamlandığında siparişin burada takip edilebilir.",
+      action: ElevatedButton(
+        onPressed: anaSayfayaDon,
+        child: const Text("Ana sayfaya dön"),
       ),
     );
   }

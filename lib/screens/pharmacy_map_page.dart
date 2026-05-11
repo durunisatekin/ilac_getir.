@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../theme/app_colors.dart';
+import '../widgets/section_header.dart';
 
 class PharmacyMapPage extends StatelessWidget {
   const PharmacyMapPage({super.key});
@@ -34,8 +37,10 @@ class PharmacyMapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final first = pharmacies.first;
+    final center = LatLng(first["lat"], first["lng"]);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text("Yakındaki Eczaneler")),
       body: ListView(
         padding: const EdgeInsets.all(12),
@@ -47,22 +52,17 @@ class PharmacyMapPage extends StatelessWidget {
               border: Border.all(color: AppColors.primaryLight),
             ),
             clipBehavior: Clip.antiAlias,
-            child: const EczaneHarita(
-              lat: 41.0256,
-              lng: 29.0963,
-              pharmacyName: "Yakındaki eczaneler",
-              address: "Örnek konum: Ümraniye",
+            child: _PharmacyMap(
+              center: center,
+              pharmacies: pharmacies,
             ),
           ),
-          const SizedBox(height: 14),
-          const Text(
-            "En yakın eczaneler",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          const SectionHeader(
+            title: "En yakın eczaneler",
+            padding: EdgeInsets.fromLTRB(0, 14, 0, 8),
           ),
-          const SizedBox(height: 8),
           for (final pharmacy in pharmacies)
             Card(
-              color: Colors.white,
               child: ListTile(
                 leading: const CircleAvatar(
                   backgroundColor: AppColors.primaryLight,
@@ -100,24 +100,21 @@ class EczaneHaritaPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final center = LatLng(pharmacy["lat"], pharmacy["lng"]);
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(title: Text(pharmacy["name"])),
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
           SizedBox(
             height: 330,
-            child: EczaneHarita(
-              lat: pharmacy["lat"],
-              lng: pharmacy["lng"],
-              pharmacyName: pharmacy["name"],
-              address: pharmacy["address"],
+            child: _PharmacyMap(
+              center: center,
+              pharmacies: [pharmacy],
             ),
           ),
           const SizedBox(height: 12),
           Card(
-            color: Colors.white,
             child: ListTile(
               leading: const Icon(Icons.local_pharmacy, color: AppColors.primary),
               title: Text(pharmacy["name"]),
@@ -130,77 +127,48 @@ class EczaneHaritaPage extends StatelessWidget {
   }
 }
 
-class EczaneHarita extends StatelessWidget {
-  final double lat;
-  final double lng;
-  final String pharmacyName;
-  final String address;
+class _PharmacyMap extends StatelessWidget {
+  final LatLng center;
+  final List<Map<String, dynamic>> pharmacies;
 
-  const EczaneHarita({
-    super.key,
-    required this.lat,
-    required this.lng,
-    required this.pharmacyName,
-    required this.address,
+  const _PharmacyMap({
+    required this.center,
+    required this.pharmacies,
   });
 
   @override
   Widget build(BuildContext context) {
-    final mapUrl =
-        "https://staticmap.openstreetmap.de/staticmap.php?center=$lat,$lng&zoom=15&size=700x420&markers=$lat,$lng,red-pushpin";
-
-    return Stack(
-      fit: StackFit.expand,
+    return FlutterMap(
+      options: MapOptions(
+        initialCenter: center,
+        initialZoom: 14.5,
+      ),
       children: [
-        Image.network(
-          mapUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: const Color(0xFFE7F2EC),
-              child: const Center(
-                child: Icon(
-                  Icons.map_outlined,
-                  size: 90,
+        TileLayer(
+          urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          userAgentPackageName: "com.example.ilac_getir",
+        ),
+        MarkerLayer(
+          markers: pharmacies.map((pharmacy) {
+            final pos = LatLng(pharmacy["lat"], pharmacy["lng"]);
+            return Marker(
+              point: pos,
+              width: 48,
+              height: 48,
+              child: GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(pharmacy["name"])),
+                  );
+                },
+                child: const Icon(
+                  Icons.location_on,
                   color: AppColors.primary,
+                  size: 42,
                 ),
               ),
             );
-          },
-        ),
-        Align(
-          alignment: Alignment.bottomLeft,
-          child: Container(
-            margin: const EdgeInsets.all(12),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
-                BoxShadow(color: Colors.black26, blurRadius: 8),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.location_on, color: AppColors.primary),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        pharmacyName,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(address, style: const TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+          }).toList(),
         ),
       ],
     );

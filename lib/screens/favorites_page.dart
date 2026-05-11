@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import '../data/medicine_data.dart';
 import '../models/cart_model.dart';
 import '../models/favorite_model.dart';
-import '../theme/app_colors.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/pill_badge.dart';
+import '../widgets/price_text.dart';
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
@@ -17,14 +19,13 @@ class FavoritesPage extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text("Favorilerim"),
-        backgroundColor: AppColors.navy,
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text("Favorilerim")),
       body: favoriteMedicines.isEmpty
-          ? const _EmptyFavorites()
+          ? const EmptyState(
+              icon: Icons.favorite_border,
+              title: "Henüz favorin yok",
+              message: "Beğendiğin ürünleri favorilere ekleyerek burada hızlıca bulabilirsin.",
+            )
           : ListView(
               padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
               children: [
@@ -36,7 +37,7 @@ class FavoritesPage extends StatelessWidget {
                     onAddToCart: () {
                       cart.addItem(
                         medicine["name"] as String,
-                        medicine["price"] as double,
+                        (medicine["price"] as num).toDouble(),
                       );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -63,10 +64,11 @@ class _FavoritesHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.navy,
+        color: theme.colorScheme.primary,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -75,10 +77,10 @@ class _FavoritesHeader extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.14),
+              color: Colors.white.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.favorite, color: Colors.redAccent),
+            child: const Icon(Icons.favorite, color: Colors.white),
           ),
           const SizedBox(width: 13),
           Expanded(
@@ -122,18 +124,16 @@ class _FavoriteMedicineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final name = medicine["name"] as String;
     final type = medicine["type"] as String;
-    final price = medicine["price"] as double;
-    final image = medicine["image"] as String;
+    final price = (medicine["price"] as num).toDouble();
+    final image = medicine["image"] as String?;
+    final theme = Theme.of(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
-        ],
+        border: Border.all(color: theme.colorScheme.primaryContainer),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -149,13 +149,15 @@ class _FavoriteMedicineCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.shade100),
               ),
-              child: Image.asset(
-                image,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.medication, color: AppColors.primaryDark);
-                },
-              ),
+              child: image == null
+                  ? Icon(Icons.medication, color: theme.colorScheme.primary)
+                  : Image.asset(
+                      image,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(Icons.medication, color: theme.colorScheme.primary);
+                      },
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -194,19 +196,12 @@ class _FavoriteMedicineCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  _CategoryPill(type: type),
+                  PillBadge(text: categoryTitle(type)),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          "${price.toStringAsFixed(0)} TL",
-                          style: const TextStyle(
-                            color: AppColors.primaryDark,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        child: PriceText(price: price),
                       ),
                       SizedBox(
                         height: 38,
@@ -214,87 +209,13 @@ class _FavoriteMedicineCard extends StatelessWidget {
                           onPressed: onAddToCart,
                           icon: const Icon(Icons.add_shopping_cart, size: 18),
                           label: const Text("Sepete ekle"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                          style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12)),
                         ),
                       ),
                     ],
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryPill extends StatelessWidget {
-  final String type;
-
-  const _CategoryPill({required this.type});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: AppColors.primaryLight,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        categoryTitle(type),
-        style: const TextStyle(
-          color: AppColors.primaryDark,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyFavorites extends StatelessWidget {
-  const _EmptyFavorites();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: BorderRadius.circular(28),
-              ),
-              child: const Icon(
-                Icons.favorite_border,
-                size: 46,
-                color: AppColors.primaryDark,
-              ),
-            ),
-            const SizedBox(height: 18),
-            const Text(
-              "Henüz favori ürün yok",
-              style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "İlaç detayında kalp ikonuna dokununca ürünler burada daha düzenli görünecek.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.black54, height: 1.4),
             ),
           ],
         ),

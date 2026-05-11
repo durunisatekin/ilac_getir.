@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../data/medicine_data.dart';
-import '../theme/app_colors.dart';
 import 'ilac_detay_page.dart';
 import 'ilac_listesi.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/price_text.dart';
+import '../theme/app_colors.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -37,7 +39,6 @@ class _SearchPageState extends State<SearchPage> {
         filteredCategories.isNotEmpty || filteredMedicines.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text("Arama")),
       body: Column(
         children: [
@@ -53,22 +54,15 @@ class _SearchPageState extends State<SearchPage> {
               decoration: InputDecoration(
                 hintText: "İlaç veya kategori ara...",
                 prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
               ),
             ),
           ),
           Expanded(
             child: !hasResult
-                ? const Center(
-                    child: Text(
-                      "Sonuç bulunamadı",
-                      style: TextStyle(fontSize: 18),
-                    ),
+                ? const EmptyState(
+                    icon: Icons.search_off,
+                    title: "Sonuç bulunamadı",
+                    message: "Farklı bir isimle aramayı deneyebilirsin.",
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.all(12),
@@ -120,9 +114,9 @@ class _MedicineResult extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primaryLight),
+          border: Border.all(color: Theme.of(context).colorScheme.primaryContainer),
+          color: Theme.of(context).cardColor,
         ),
         child: Row(
           children: [
@@ -137,11 +131,10 @@ class _MedicineResult extends StatelessWidget {
                     medicine["name"],
                     style: const TextStyle(
                       fontSize: 16,
-                      color: AppColors.navy,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text("${medicine["price"]} TL"),
+                  PriceText(price: (medicine["price"] as num).toDouble()),
                 ],
               ),
             ),
@@ -160,6 +153,7 @@ class _MedicineImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: 58,
       height: 58,
@@ -167,18 +161,15 @@ class _MedicineImage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.primaryLight),
+        border: Border.all(color: theme.colorScheme.primaryContainer),
       ),
       child: imagePath == null
-          ? const Icon(Icons.medication, color: AppColors.primaryDark)
+          ? Icon(Icons.medication, color: theme.colorScheme.primary)
           : Image.asset(
               imagePath!,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
-                return const Icon(
-                  Icons.medication,
-                  color: AppColors.primaryDark,
-                );
+                return Icon(Icons.medication, color: theme.colorScheme.primary);
               },
             ),
     );
@@ -203,19 +194,17 @@ class _CategoryResult extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primaryLight),
+          border: Border.all(color: Theme.of(context).colorScheme.primaryContainer),
+          color: Theme.of(context).cardColor,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircleAvatar(
               radius: 26,
-              backgroundColor: AppColors.primaryLight,
               child: Icon(
                 category["icon"],
-                color: AppColors.primaryDark,
                 size: 28,
               ),
             ),
@@ -225,7 +214,6 @@ class _CategoryResult extends StatelessWidget {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 17,
-                color: AppColors.navy,
                 fontWeight: FontWeight.bold,
               ),
             ),

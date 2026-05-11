@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ilac_getir/models/cart_model.dart';
 import 'package:ilac_getir/models/favorite_model.dart';
 import 'package:ilac_getir/models/user_model.dart';
-import 'package:ilac_getir/theme/app_colors.dart';
+import 'package:ilac_getir/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'screens/eczane_harita_page.dart';
 import 'screens/odeme_page.dart';
@@ -29,25 +29,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: "Dvita",
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          scaffoldBackgroundColor: AppColors.background,
-          primaryColor: AppColors.primary,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.primary,
-            primary: AppColors.primary,
-            secondary: AppColors.accent,
-          ),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: AppColors.navy,
-            foregroundColor: Colors.white,
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ),
+        theme: AppTheme.light(),
         home: const SplashPage(),
         routes: {
           "/sepet": (_) => const SepetPage(),
