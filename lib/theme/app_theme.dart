@@ -18,13 +18,15 @@ class AppTheme {
 
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.background,
+
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
       ),
-      cardTheme: CardTheme(
+
+      cardTheme: CardThemeData(
         color: Colors.white,
         elevation: 0,
         margin: EdgeInsets.zero,
@@ -33,17 +35,22 @@ class AppTheme {
           side: const BorderSide(color: AppColors.primaryLight),
         ),
       ),
+
       dividerTheme: const DividerThemeData(
         color: Color(0xFFE6EEF0),
         thickness: 1,
         space: 24,
       ),
+
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.navy,
-        contentTextStyle: base.textTheme.bodyMedium?.copyWith(color: Colors.white),
+        contentTextStyle: base.textTheme.bodyMedium?.copyWith(
+          color: Colors.white,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
@@ -54,6 +61,7 @@ class AppTheme {
           borderSide: BorderSide.none,
         ),
       ),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -66,6 +74,7 @@ class AppTheme {
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
+
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primaryDark,
@@ -77,15 +86,19 @@ class AppTheme {
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
+
       textTheme: base.textTheme.copyWith(
         titleLarge: base.textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w800,
           letterSpacing: -0.2,
         ),
-        titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        titleMedium: base.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
         bodyLarge: base.textTheme.bodyLarge?.copyWith(height: 1.25),
         bodyMedium: base.textTheme.bodyMedium?.copyWith(height: 1.25),
       ),
+
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
         selectedItemColor: AppColors.primary,
@@ -96,4 +109,3 @@ class AppTheme {
     );
   }
 }
-

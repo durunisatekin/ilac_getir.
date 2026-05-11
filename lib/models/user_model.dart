@@ -75,7 +75,16 @@ class UserModel extends ChangeNotifier {
       return false;
     }
 
+    // Eğer farklı telefon ile giriş yapılıyorsa, eski veriyi taşı
+    final oldUserId = getCurrentUserId();
+    final newUserId = userPhone.isNotEmpty ? userPhone : "guest_${userPhone}_$name";
+    
+    if (oldUserId != newUserId && oldUserId != "guest_$name") {
+      await transferUserData(oldUserId, newUserId);
+    }
+
     isLoggedIn = true;
+    phone = userPhone;
 
     _fillDemoProfileData();
 
@@ -90,6 +99,76 @@ class UserModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Kullanıcı değişiminde veri taşıma metodları
+  Future<void> transferUserData(String oldUserId, String newUserId) async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Favorileri taşı
+    final favoritesJson = prefs.getStringList("userFavorites") ?? [];
+    final updatedFavorites = <String>[];
+    
+    for (final favJson in favoritesJson) {
+      try {
+        final parts = favJson.split("|");
+        if (parts.length >= 3 && parts[1] == oldUserId) {
+          // Eski kullanıcı ID'sini yeni ID ile değiştir
+          updatedFavorites.add("${parts[0]}|$newUserId|${parts[2]}");
+        } else {
+          // Diğer favorileri aynen kopyala
+          updatedFavorites.add(favJson);
+        }
+      } catch (e) {
+        updatedFavorites.add(favJson);
+      }
+    }
+    
+    await prefs.setStringList("userFavorites", updatedFavorites);
+    
+    // Siparişleri taşı
+    final ordersJson = prefs.getStringList("userOrders") ?? [];
+    final updatedOrders = <String>[];
+    
+    for (final orderJson in ordersJson) {
+      try {
+        final parts = orderJson.split("|");
+        if (parts.length >= 6 && parts[1] == oldUserId) {
+          // Eski kullanıcı ID'sini yeni ID ile değiştir
+          updatedOrders.add("${parts[0]}|$newUserId|${parts[2]}|${parts[3]}|${parts[4]}|${parts[5]}");
+        } else {
+          // Diğer siparişleri aynen kopyala
+          updatedOrders.add(orderJson);
+        }
+      } catch (e) {
+        updatedOrders.add(orderJson);
+      }
+    }
+    
+    await prefs.setStringList("userOrders", updatedOrders);
+    
+    // Provider'ları yenile
+    notifyListeners();
+  }
+
+  // Mevcut kullanıcı ID'sini al
+  String getCurrentUserId() {
+    return phone.isNotEmpty ? phone : "guest_$name";
+  }
+
+  // Kullanıcı adını güncelleme
+  Future<void> updateUserName(String newName) async {
+    name = newName;
+    await saveUser();
+    notifyListeners();
+  }
+
+  // Telefon numarasını güncelleme
+  Future<void> updateUserPhone(String newPhone) async {
+    phone = newPhone;
+    await saveUser();
+    notifyListeners();
+  }
+
+  
   Future<void> addOldOrder(String orderSummary) async {
     oldOrders.add(orderSummary);
     await saveUser();

@@ -54,31 +54,34 @@ class _DashboardPageState extends State<DashboardPage> {
       "icon": Icons.medication,
     },
     {
-      "name": "Diğer",
-      "type": "diger",
+      "name": "Dermokozmetik",
+      "type": "dermokozmetik",
       "color": Colors.purple,
-      "icon": Icons.more_horiz,
+      "icon": Icons.face,
     },
   ];
 
   final List<Map<String, dynamic>> campaigns = [
     {
-      "title": "Dvita ile sağlık kapında",
-      "text": "İhtiyacın olan ürünleri hızlıca bul.",
-      "icon": Icons.health_and_safety,
-      "color": AppColors.navy,
+      "title": "Hızlı Teslimat",
+      "text": "30 dakikada kapında",
+      "icon": Icons.local_shipping,
+      "color": const Color(0xFFFF6B35),
+      "gradient": [const Color(0xFFFF6B35), const Color(0xFFF7931E)],
     },
     {
-      "title": "Nöbetçi eczaneleri gör",
-      "text": "Gece açık eczaneleri tek ekranda incele.",
-      "icon": Icons.nightlight_round,
-      "color": AppColors.primaryDark,
+      "title": "İndirim Fırsatları",
+      "text": "%50'ye varan indirimler",
+      "icon": Icons.local_offer,
+      "color": const Color(0xFFE91E63),
+      "gradient": [const Color(0xFFE91E63), const Color(0xFF9C27B0)],
     },
     {
-      "title": "Yakındaki eczaneler",
-      "text": "Harita görünümüyle yakın noktaları keşfet.",
-      "icon": Icons.map_outlined,
-      "color": Colors.deepOrange,
+      "title": "Dermokozmetik",
+      "text": "En çok satılan ürünler",
+      "icon": Icons.face,
+      "color": const Color(0xFF9C27B0),
+      "gradient": [const Color(0xFF9C27B0), const Color(0xFF673AB7)],
     },
   ];
 
@@ -135,7 +138,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 16),
+        padding: EdgeInsets.zero,
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
@@ -179,8 +182,19 @@ class _DashboardPageState extends State<DashboardPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 12),
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: campaign["color"],
+                    gradient: LinearGradient(
+                      colors: campaign["gradient"],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: campaign["color"].withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
@@ -193,22 +207,34 @@ class _DashboardPageState extends State<DashboardPage> {
                               campaign["title"],
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 22,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 6),
                             Text(
                               campaign["text"],
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 15,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Icon(campaign["icon"], color: Colors.white, size: 70),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          campaign["icon"], 
+                          color: Colors.white, 
+                          size: 40,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -286,22 +312,41 @@ class _DashboardPageState extends State<DashboardPage> {
                   onTap: () =>
                       openPage(IlacListesi(kategori: kategori["type"])),
                   child: Container(
-                    width: 105,
+                    width: 100,
                     margin: const EdgeInsets.only(right: 10),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.shade200),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade100),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircleAvatar(
-                          backgroundColor: kategori["color"],
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                kategori["color"],
+                                kategori["color"].withOpacity(0.8),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           child: Icon(
                             kategori["icon"],
                             color: Colors.white,
-                            size: 22,
+                            size: 24,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -309,8 +354,9 @@ class _DashboardPageState extends State<DashboardPage> {
                           kategori["name"],
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
                           ),
                         ),
                       ],

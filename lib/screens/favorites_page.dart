@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../data/medicine_data.dart';
 import '../models/cart_model.dart';
 import '../models/favorite_model.dart';
+import '../models/user_model.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/pill_badge.dart';
 import '../widgets/price_text.dart';
@@ -14,8 +15,10 @@ class FavoritesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final favorites = context.watch<FavoriteModel>();
     final cart = context.read<Cart>();
+    final user = context.read<UserModel>();
+    final userId = user.phone.isNotEmpty ? user.phone : "guest_${user.name}";
     final favoriteMedicines = medicines
-        .where((medicine) => favorites.isFavorite(medicine["name"] as String))
+        .where((medicine) => favorites.isFavorite(medicine["name"] as String, userId))
         .toList();
 
     return Scaffold(
@@ -47,7 +50,7 @@ class FavoritesPage extends StatelessWidget {
                       );
                     },
                     onRemove: () {
-                      favorites.toggleFavorite(medicine["name"] as String);
+                      favorites.toggleFavorite(medicine["name"] as String, userId);
                     },
                   ),
                 ),

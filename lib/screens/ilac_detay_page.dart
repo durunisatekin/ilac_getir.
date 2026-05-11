@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
 import '../models/favorite_model.dart';
+import '../models/user_model.dart';
 import '../theme/app_colors.dart';
 
 class IlacDetayPage extends StatelessWidget {
@@ -13,7 +14,9 @@ class IlacDetayPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final cart = context.read<Cart>();
     final favorites = context.watch<FavoriteModel>();
-    final isFavorite = favorites.isFavorite(ilac["name"]);
+    final user = context.read<UserModel>();
+    final userId = user.phone.isNotEmpty ? user.phone : "guest_${user.name}";
+    final isFavorite = favorites.isFavorite(ilac["name"], userId);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -22,7 +25,7 @@ class IlacDetayPage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              favorites.toggleFavorite(ilac["name"]);
+              favorites.toggleFavorite(ilac["name"], userId);
             },
             icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
           ),

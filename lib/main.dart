@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:ilac_getir/models/cart_model.dart';
 import 'package:ilac_getir/models/favorite_model.dart';
+import 'package:ilac_getir/models/order_model.dart';
 import 'package:ilac_getir/models/user_model.dart';
 import 'package:ilac_getir/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'screens/eczane_harita_page.dart';
 import 'screens/odeme_page.dart';
 import 'screens/sepet_page.dart';
+import 'screens/siparis_gecmisi_page.dart';
 import 'screens/splash_page.dart';
 
 void main() {
@@ -25,6 +27,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => Cart()),
         ChangeNotifierProvider(create: (_) => UserModel()),
         ChangeNotifierProvider(create: (_) => FavoriteModel()),
+        ChangeNotifierProvider(create: (_) => OrderModel()),
       ],
       child: MaterialApp(
         title: "Dvita",
@@ -34,6 +37,7 @@ class MyApp extends StatelessWidget {
         routes: {
           "/sepet": (_) => const SepetPage(),
           "/odeme": (_) => const OdemePage(),
+          "/siparis-gecmisi": (_) => const SiparisGecmisiPage(),
           "/yakindaki-eczaneler": (_) =>
               const EczaneHaritaPage(sadeceNobetci: false),
           "/nobetci-eczaneler": (_) =>
