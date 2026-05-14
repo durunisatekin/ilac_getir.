@@ -215,7 +215,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             Text(
                               campaign["text"],
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.5),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -230,8 +230,8 @@ class _DashboardPageState extends State<DashboardPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
-                          campaign["icon"], 
-                          color: Colors.white, 
+                          campaign["icon"],
+                          color: Colors.white,
                           size: 40,
                         ),
                       ),
@@ -320,7 +320,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       border: Border.all(color: Colors.grey.shade100),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withValues(alpha: 0.5),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),

@@ -4,7 +4,6 @@ import 'ilac_detay_page.dart';
 import 'ilac_listesi.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/price_text.dart';
-import '../theme/app_colors.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -115,7 +114,9 @@ class _MedicineResult extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Theme.of(context).colorScheme.primaryContainer),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primaryContainer,
+          ),
           color: Theme.of(context).cardColor,
         ),
         child: Row(
@@ -195,27 +196,20 @@ class _CategoryResult extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Theme.of(context).colorScheme.primaryContainer),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primaryContainer,
+          ),
           color: Theme.of(context).cardColor,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 26,
-              child: Icon(
-                category["icon"],
-                size: 28,
-              ),
-            ),
+            CircleAvatar(radius: 26, child: Icon(category["icon"], size: 28)),
             const SizedBox(height: 10),
             Text(
               category["name"],
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
           ],
         ),

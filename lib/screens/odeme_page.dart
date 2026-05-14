@@ -41,9 +41,27 @@ class _OdemePageState extends State<OdemePage> {
 
   Future<void> _saveAddressInfo() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("teslimatIsimSoyisim", isimSoyisimController.text.trim());
+    await prefs.setString(
+      "teslimatIsimSoyisim",
+      isimSoyisimController.text.trim(),
+    );
     await prefs.setString("teslimatAdresAdi", adresAdiController.text.trim());
-    await prefs.setString("teslimatAdresTarifi", adresTarifiController.text.trim());
+    await prefs.setString(
+      "teslimatAdresTarifi",
+      adresTarifiController.text.trim(),
+    );
+  }
+
+  /// Format doğrulaması: 16 haneli kart, AA/YY tarih, 3 haneli CVV
+  /// Herhangi bir kart bu formatı sağlarsa ödeme kabul edilir.
+  bool _isKartGecerli() {
+    final kart = kartController.text.replaceAll(" ", "");
+    final tarih = tarihController.text;
+    final cvv = cvvController.text;
+    if (kart.length != 16) return false;
+    if (!RegExp(r'^\d{2}/\d{2}$').hasMatch(tarih)) return false;
+    if (cvv.length != 3) return false;
+    return true;
   }
 
   Future<void> odemeyiTamamla() async {
@@ -54,19 +72,10 @@ class _OdemePageState extends State<OdemePage> {
       return;
     }
 
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    final girilenKart = kartController.text.replaceAll(" ", "");
-    final girilenTarih = tarihController.text;
-    final girilenCvv = cvvController.text;
-
-    if (seciliOdeme == "kart" &&
-        (girilenKart != "5858585858585858" ||
-            girilenTarih != "05/20" ||
-            girilenCvv != "588")) {
-      setState(() => hataMesaji = "Kart bilgilerini kontrol ediniz");
+    if (seciliOdeme == "kart" && !_isKartGecerli()) {
+      setState(() => hataMesaji = "Lütfen geçerli kart bilgilerini giriniz");
       return;
     }
 
@@ -148,12 +157,10 @@ class _OdemePageState extends State<OdemePage> {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        seciliOdeme = "kart";
-                        hataMesaji = "";
-                      });
-                    },
+                    onPressed: () => setState(() {
+                      seciliOdeme = "kart";
+                      hataMesaji = "";
+                    }),
                     icon: const Icon(Icons.credit_card),
                     label: const Text("Kredi Kartı"),
                     style: ElevatedButton.styleFrom(
@@ -166,12 +173,10 @@ class _OdemePageState extends State<OdemePage> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        seciliOdeme = "nakit";
-                        hataMesaji = "";
-                      });
-                    },
+                    onPressed: () => setState(() {
+                      seciliOdeme = "nakit";
+                      hataMesaji = "";
+                    }),
                     icon: const Icon(Icons.payments_outlined),
                     label: const Text("Nakit"),
                     style: ElevatedButton.styleFrom(
@@ -184,11 +189,12 @@ class _OdemePageState extends State<OdemePage> {
               ],
             ),
             const SizedBox(height: 20),
-            if (seciliOdeme == "kart") _CardPaymentForm(
-              kartController: kartController,
-              tarihController: tarihController,
-              cvvController: cvvController,
-            ),
+            if (seciliOdeme == "kart")
+              _CardPaymentForm(
+                kartController: kartController,
+                tarihController: tarihController,
+                cvvController: cvvController,
+              ),
             if (hataMesaji.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 10),
@@ -225,7 +231,7 @@ class _PaymentItemCard extends StatelessWidget {
 
   Map<String, dynamic>? get medicine {
     try {
-      return medicines.firstWhere((medicine) => medicine["name"] == item.name);
+      return medicines.firstWhere((m) => m["name"] == item.name);
     } catch (_) {
       return null;
     }
@@ -258,9 +264,10 @@ class _PaymentItemCard extends StatelessWidget {
                 : Image.asset(
                     image,
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.medication, color: AppColors.primaryDark);
-                    },
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.medication,
+                      color: AppColors.primaryDark,
+                    ),
                   ),
           ),
           const SizedBox(width: 12),
@@ -270,12 +277,15 @@ class _PaymentItemCard extends StatelessWidget {
               children: [
                 Text(
                   item.name,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "Adet: ${item.quantity}",
-                  style: const TextStyle(color: Colors.black54),
+                  "${item.price.toStringAsFixed(2)} TL × ${item.quantity}",
+                  style: const TextStyle(color: Colors.black54, fontSize: 13),
                 ),
               ],
             ),
@@ -283,8 +293,8 @@ class _PaymentItemCard extends StatelessWidget {
           Text(
             "${(item.price * item.quantity).toStringAsFixed(2)} TL",
             style: const TextStyle(
-              color: AppColors.primaryDark,
               fontWeight: FontWeight.bold,
+              color: AppColors.primaryDark,
             ),
           ),
         ],
@@ -318,7 +328,7 @@ class _AddressForm extends StatelessWidget {
           _AddressTextField(
             controller: isimSoyisimController,
             label: "İsim Soyisim",
-            hint: "Duru Tekin",
+            hint: "Adınız ve soyadınız",
             icon: Icons.person_outline,
           ),
           const SizedBox(height: 12),
@@ -408,14 +418,14 @@ class _CardPaymentForm extends StatelessWidget {
             KartNumarasiFormatter(),
           ],
           validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return "Kart numarası boş bırakılamaz";
-            }
+            final temiz = (value ?? "").replaceAll(" ", "");
+            if (temiz.isEmpty) return "Kart numarası boş bırakılamaz";
+            if (temiz.length != 16) return "Kart numarası 16 haneli olmalı";
             return null;
           },
           decoration: const InputDecoration(
             labelText: "Kart Numarası",
-            hintText: "5858 5858 5858 5858",
+            hintText: "•••• •••• •••• ••••",
             border: OutlineInputBorder(),
           ),
         ),
@@ -432,14 +442,16 @@ class _CardPaymentForm extends StatelessWidget {
                   TarihFormatter(),
                 ],
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null || value.trim().isEmpty)
                     return "Tarih gerekli";
+                  if (!RegExp(r'^\d{2}/\d{2}$').hasMatch(value)) {
+                    return "AA/YY formatında girin";
                   }
                   return null;
                 },
                 decoration: const InputDecoration(
-                  labelText: "Tarih",
-                  hintText: "05/20",
+                  labelText: "Son Kullanma Tarihi",
+                  hintText: "AA/YY",
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -449,19 +461,20 @@ class _CardPaymentForm extends StatelessWidget {
               child: TextFormField(
                 controller: cvvController,
                 keyboardType: TextInputType.number,
+                obscureText: true,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(3),
                 ],
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null || value.trim().isEmpty)
                     return "CVV gerekli";
-                  }
+                  if (value.length != 3) return "CVV 3 haneli olmalı";
                   return null;
                 },
                 decoration: const InputDecoration(
                   labelText: "CVV",
-                  hintText: "588",
+                  hintText: "•••",
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -516,15 +529,10 @@ class KartNumarasiFormatter extends TextInputFormatter {
   ) {
     final rakamlar = newValue.text.replaceAll(" ", "");
     var yeniYazi = "";
-
     for (int i = 0; i < rakamlar.length; i++) {
-      if (i != 0 && i % 4 == 0) {
-        yeniYazi += " ";
-      }
-
+      if (i != 0 && i % 4 == 0) yeniYazi += " ";
       yeniYazi += rakamlar[i];
     }
-
     return TextEditingValue(
       text: yeniYazi,
       selection: TextSelection.collapsed(offset: yeniYazi.length),
@@ -539,11 +547,9 @@ class TarihFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     var rakamlar = newValue.text.replaceAll("/", "");
-
     if (rakamlar.length > 2) {
       rakamlar = "${rakamlar.substring(0, 2)}/${rakamlar.substring(2)}";
     }
-
     return TextEditingValue(
       text: rakamlar,
       selection: TextSelection.collapsed(offset: rakamlar.length),

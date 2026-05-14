@@ -94,9 +94,4 @@ class OrderModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // Veri yenileme metodu
-  Future<void> refreshData() async {
-    await loadOrders();
-  }
 }

@@ -1,7 +1,171 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../theme/app_colors.dart';
 
+// ---------------------------------------------------------------------------
+// Sabit başlangıç konumu: Ümraniye - İstiklal Mahallesi
+// ---------------------------------------------------------------------------
+const LatLng _kUserLocation = LatLng(41.02560, 29.09630);
+const String _kUserAddress = "İstiklal Mah., Ümraniye / İstanbul";
+
+// ---------------------------------------------------------------------------
+// Gerçek Ümraniye eczane verileri
+// ---------------------------------------------------------------------------
+const List<_PharmacyData> _kPharmacies = [
+  _PharmacyData(
+    name: "Kazım Karabekir Eczanesi",
+    address: "Kazım Karabekir Mah. Adem Yavuz Cad. No:32, Ümraniye",
+    phone: "0216 632 44 00",
+    lat: 41.0168,
+    lng: 29.1142,
+    isOnDuty: false,
+  ),
+  _PharmacyData(
+    name: "İnkılap Eczanesi",
+    address: "Namık Kemal Mah. Sütçü İmam Cad. No:100/A, Ümraniye",
+    phone: "0216 461 39 19",
+    lat: 41.0228,
+    lng: 29.0882,
+    isOnDuty: false,
+  ),
+  _PharmacyData(
+    name: "Armağanevler Eczanesi",
+    address: "Armağanevler Mah. Mithat Paşa Cad. No:144/B, Ümraniye",
+    phone: "0216 335 43 86",
+    lat: 41.0195,
+    lng: 29.0821,
+    isOnDuty: false,
+  ),
+  _PharmacyData(
+    name: "Madenler Eczanesi",
+    address:
+        "Madenler Mah. İdealist Kent Cad. No:5/4, İdealist Park AVM, Ümraniye",
+    phone: "0216 590 03 53",
+    lat: 41.0381,
+    lng: 29.1205,
+    isOnDuty: true,
+  ),
+  _PharmacyData(
+    name: "Elmalıkent Eczanesi",
+    address: "Elmalıkent Mah. Adem Yavuz Cad. No:79/A, Ümraniye",
+    phone: "0216 631 27 17",
+    lat: 41.0142,
+    lng: 29.1088,
+    isOnDuty: false,
+  ),
+  _PharmacyData(
+    name: "Atatürk Eczanesi",
+    address: "Atatürk Mah. Çavuşbaşı Cad. No:80/A, Ümraniye",
+    phone: "0554 405 80 90",
+    lat: 41.0075,
+    lng: 29.0965,
+    isOnDuty: false,
+  ),
+  _PharmacyData(
+    name: "Canpark Eczanesi",
+    address: "Yamanevler Mah. Alemdağ Cad. No:169, Canpark AVM Z08, Ümraniye",
+    phone: "0216 510 42 48",
+    lat: 41.0312,
+    lng: 29.1045,
+    isOnDuty: true,
+  ),
+  _PharmacyData(
+    name: "Ihlamurkuyu Eczanesi",
+    address: "Ihlamurkuyu Mah. Alemdağ Cad. No:1/B, Ümraniye",
+    phone: "0216 540 25 60",
+    lat: 41.0358,
+    lng: 29.0998,
+    isOnDuty: false,
+  ),
+  _PharmacyData(
+    name: "Şerifali Eczanesi",
+    address: "Şerifali Mah. İbrahim Hakkı Sok. No:13A, Ümraniye",
+    phone: "0216 508 10 70",
+    lat: 41.0052,
+    lng: 29.1178,
+    isOnDuty: false,
+  ),
+  _PharmacyData(
+    name: "İstiklal Eczanesi",
+    address: "İstiklal Mah. Anafartalar Cad. No:3/B, Ümraniye",
+    phone: "0216 461 39 19",
+    lat: 41.0263,
+    lng: 29.0945,
+    isOnDuty: true,
+  ),
+  _PharmacyData(
+    name: "Çakmak Eczanesi",
+    address: "Çakmak Mah. Tavukçu Yolu Üzeri, Ümraniye",
+    phone: "0216 332 15 00",
+    lat: 41.0118,
+    lng: 29.0788,
+    isOnDuty: false,
+  ),
+  _PharmacyData(
+    name: "Son Durak Eczanesi",
+    address: "Yamanevler Mah. Küçüksu Cad. No:19B, Canpark AVM Yolu, Ümraniye",
+    phone: "0216 461 82 30",
+    lat: 41.0285,
+    lng: 29.1015,
+    isOnDuty: true,
+  ),
+];
+
+// ---------------------------------------------------------------------------
+// Veri modeli
+// ---------------------------------------------------------------------------
+class _PharmacyData {
+  final String name;
+  final String address;
+  final String phone;
+  final double lat;
+  final double lng;
+  final bool isOnDuty;
+
+  const _PharmacyData({
+    required this.name,
+    required this.address,
+    required this.phone,
+    required this.lat,
+    required this.lng,
+    required this.isOnDuty,
+  });
+
+  LatLng get latLng => LatLng(lat, lng);
+
+  int distanceMetersFrom(LatLng origin) {
+    const d = Distance();
+    return d.as(LengthUnit.Meter, origin, latLng).round();
+  }
+
+  String distanceTextFrom(LatLng origin) {
+    final m = distanceMetersFrom(origin);
+    return m >= 1000 ? "${(m / 1000).toStringAsFixed(1)} km" : "$m m";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Navigasyon yardımcısı
+// ---------------------------------------------------------------------------
+Future<void> _openGoogleMapsNavigation(double lat, double lng) async {
+  final appUri = Uri.parse("google.navigation:q=$lat,$lng&mode=d");
+  final webUri = Uri.parse(
+    "https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving",
+  );
+
+  if (await canLaunchUrl(appUri)) {
+    await launchUrl(appUri);
+  } else {
+    await launchUrl(webUri, mode: LaunchMode.externalApplication);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Ana sayfa widget'ı
+// ---------------------------------------------------------------------------
 class EczaneHaritaPage extends StatefulWidget {
   final bool sadeceNobetci;
 
@@ -12,115 +176,62 @@ class EczaneHaritaPage extends StatefulWidget {
 }
 
 class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
-  Position? _currentPosition;
-  List<_Pharmacy> _pharmacies = [];
-  _Pharmacy? _selectedPharmacy;
-  bool _loading = true;
-  String? _errorMessage;
+  late final MapController _mapController;
+  _PharmacyData? _selectedPharmacy;
+  late final List<_PharmacyData> _pharmacies;
+  double _currentZoom = 14.5;
 
   @override
   void initState() {
     super.initState();
-    _loadLocationAndPharmacies();
+    _mapController = MapController();
+    _pharmacies = widget.sadeceNobetci
+        ? _kPharmacies.where((p) => p.isOnDuty).toList()
+        : (List.from(_kPharmacies)..sort(
+            (a, b) => a
+                .distanceMetersFrom(_kUserLocation)
+                .compareTo(b.distanceMetersFrom(_kUserLocation)),
+          ));
+    _selectedPharmacy = _pharmacies.firstOrNull;
   }
 
-  Future<void> _loadLocationAndPharmacies() async {
-    setState(() {
-      _loading = true;
-      _errorMessage = null;
-    });
-
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      setState(() {
-        _loading = false;
-        _errorMessage = "Konum servisi kapalı. Eczaneleri görebilmek için konumu açmalısın.";
-      });
-      return;
-    }
-
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-
-    if (permission == LocationPermission.denied) {
-      setState(() {
-        _loading = false;
-        _errorMessage = "Konum izni verilmedi. Yakındaki eczaneleri listelemek için izin gerekli.";
-      });
-      return;
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      setState(() {
-        _loading = false;
-        _errorMessage = "Konum izni kalıcı olarak kapatılmış. Ayarlardan izin vermen gerekiyor.";
-      });
-      return;
-    }
-
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-    final pharmacies = _buildPharmacies(position);
-
-    setState(() {
-      _currentPosition = position;
-      _pharmacies = widget.sadeceNobetci
-          ? pharmacies.where((pharmacy) => pharmacy.isOnDuty).toList()
-          : pharmacies;
-      _selectedPharmacy = _pharmacies.firstOrNull;
-      _loading = false;
-    });
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
   }
 
-  List<_Pharmacy> _buildPharmacies(Position position) {
-    final templates = [
-      _PharmacyTemplate("Şifa Eczanesi", "Atatürk Mah. 123. Sokak No:5", 0.0045, 0.0032, true),
-      _PharmacyTemplate("Güneş Eczanesi", "Cumhuriyet Cad. No:45", -0.0030, 0.0025, false),
-      _PharmacyTemplate("Merkez Eczanesi", "İstasyon Meydanı No:12", 0.0020, -0.0040, true),
-      _PharmacyTemplate("Hayat Eczanesi", "Sağlık Sok. No:8", -0.0042, -0.0020, false),
-      _PharmacyTemplate("Dvita Eczanesi", "Papatya Cad. No:18", 0.0060, -0.0015, true),
-      _PharmacyTemplate("Yeni Eczane", "Barış Mah. Çınar Sok. No:7", -0.0018, 0.0050, false),
-      _PharmacyTemplate("Can Eczanesi", "Okul Cad. No:31", 0.0010, 0.0062, true),
-      _PharmacyTemplate("Sağlık Eczanesi", "Lale Sok. No:11", -0.0055, 0.0040, false),
-      _PharmacyTemplate("Umut Eczanesi", "Mimar Sinan Cad. No:20", 0.0035, -0.0060, true),
-      _PharmacyTemplate("Park Eczanesi", "Park Yolu No:3", -0.0060, -0.0048, false),
-      _PharmacyTemplate("Çınar Eczanesi", "Bahçeşehir Cad. No:16", 0.0070, 0.0045, false),
-      _PharmacyTemplate("Gece Şifa Eczanesi", "Nöbetçi Sok. No:2", -0.0025, -0.0065, true),
-    ];
+  // Seçilen eczaneye tam olarak uç — koordinatları doğrudan kullanıyoruz
+  void _selectAndFly(_PharmacyData pharmacy) {
+    setState(() {
+      _selectedPharmacy = pharmacy;
+      _currentZoom = 16.0;
+    });
+    _mapController.move(LatLng(pharmacy.lat, pharmacy.lng), 16.0);
+  }
 
-    final pharmacies = templates.map((template) {
-      final latitude = position.latitude + template.latitudeOffset;
-      final longitude = position.longitude + template.longitudeOffset;
-      final distance = Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        latitude,
-        longitude,
-      );
+  void _zoomIn() {
+    _currentZoom = (_currentZoom + 1).clamp(3.0, 18.0);
+    _mapController.move(_mapController.camera.center, _currentZoom);
+    setState(() {});
+  }
 
-      return _Pharmacy(
-        name: template.name,
-        address: template.address,
-        latitude: latitude,
-        longitude: longitude,
-        latitudeOffset: template.latitudeOffset,
-        longitudeOffset: template.longitudeOffset,
-        distanceMeters: distance.round(),
-        isOnDuty: template.isOnDuty,
-        phone: "0 212 ${300 + distance.round() % 500} ${10 + distance.round() % 80} ${20 + distance.round() % 70}",
-      );
-    }).toList();
+  void _zoomOut() {
+    _currentZoom = (_currentZoom - 1).clamp(3.0, 18.0);
+    _mapController.move(_mapController.camera.center, _currentZoom);
+    setState(() {});
+  }
 
-    pharmacies.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
-    return pharmacies;
+  void _goToMyLocation() {
+    setState(() => _currentZoom = 14.5);
+    _mapController.move(_kUserLocation, 14.5);
   }
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.sadeceNobetci ? "Nöbetçi Eczaneler" : "Yakındaki Eczaneler";
+    final title = widget.sadeceNobetci
+        ? "Nöbetçi Eczaneler"
+        : "Yakındaki Eczaneler";
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -129,58 +240,303 @@ class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
         backgroundColor: AppColors.navy,
         foregroundColor: Colors.white,
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-          ? _LocationError(message: _errorMessage!, onRetry: _loadLocationAndPharmacies)
-          : RefreshIndicator(
-              onRefresh: _loadLocationAndPharmacies,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
+        children: [
+          _SummaryBanner(
+            onlyDuty: widget.sadeceNobetci,
+            count: _pharmacies.length,
+          ),
+          const SizedBox(height: 12),
+
+          // Harita
+          ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: SizedBox(
+              height: 285,
+              child: Stack(
                 children: [
-                  _MapSummary(
-                    onlyDuty: widget.sadeceNobetci,
-                    pharmacyCount: _pharmacies.length,
-                    position: _currentPosition!,
+                  FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter: _kUserLocation,
+                      initialZoom: _currentZoom,
+                      onMapEvent: (event) {
+                        if (event is MapEventMove) {
+                          _currentZoom = event.camera.zoom;
+                        }
+                      },
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        userAgentPackageName: "com.example.ilac_getir",
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          // Kullanıcı konumu marker'ı
+                          Marker(
+                            point: _kUserLocation,
+                            width: 54,
+                            height: 54,
+                            child: const _UserLocationMarker(),
+                          ),
+                          // Eczane marker'ları — her birinin koordinatı doğrudan kullanılıyor
+                          ..._pharmacies.map(
+                            (p) => Marker(
+                              point: LatLng(p.lat, p.lng),
+                              width: 46,
+                              height: 46,
+                              child: GestureDetector(
+                                onTap: () {
+                                  _selectAndFly(p);
+                                  _showPharmacyBottomSheet(context, p);
+                                },
+                                child: _PharmacyMarker(
+                                  isOnDuty: p.isOnDuty,
+                                  isSelected: _selectedPharmacy == p,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  _MapPreview(
-                    pharmacies: _pharmacies,
-                    selectedPharmacy: _selectedPharmacy,
-                    onSelected: (pharmacy) {
-                      setState(() => _selectedPharmacy = pharmacy);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    widget.sadeceNobetci ? "Bu gece açık olanlar" : "Konumuna en yakın eczaneler",
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  ..._pharmacies.map(
-                    (pharmacy) => _PharmacyCard(
-                      pharmacy: pharmacy,
-                      selected: pharmacy == _selectedPharmacy,
-                      onTap: () => setState(() => _selectedPharmacy = pharmacy),
+
+                  // Zoom & konum kontrol butonları (sağ alt köşe)
+                  Positioned(
+                    right: 10,
+                    bottom: 10,
+                    child: Column(
+                      children: [
+                        _MapControlButton(
+                          icon: Icons.add,
+                          onTap: _zoomIn,
+                          tooltip: "Yakınlaştır",
+                        ),
+                        const SizedBox(height: 6),
+                        _MapControlButton(
+                          icon: Icons.remove,
+                          onTap: _zoomOut,
+                          tooltip: "Uzaklaştır",
+                        ),
+                        const SizedBox(height: 6),
+                        _MapControlButton(
+                          icon: Icons.my_location,
+                          onTap: _goToMyLocation,
+                          tooltip: "Konumuma git",
+                          color: AppColors.accent,
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Harita açıklaması
+          Row(
+            children: [
+              _LegendDot(color: AppColors.primary),
+              const SizedBox(width: 6),
+              const Text("Normal", style: TextStyle(fontSize: 12)),
+              const SizedBox(width: 16),
+              _LegendDot(color: Colors.redAccent),
+              const SizedBox(width: 6),
+              const Text("Nöbetçi", style: TextStyle(fontSize: 12)),
+              const SizedBox(width: 16),
+              _LegendDot(color: AppColors.accent),
+              const SizedBox(width: 6),
+              const Text("Konumun", style: TextStyle(fontSize: 12)),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+          Text(
+            widget.sadeceNobetci
+                ? "Bu gece açık olanlar"
+                : "Konumuna en yakın eczaneler",
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          ..._pharmacies.map(
+            (pharmacy) => _PharmacyCard(
+              pharmacy: pharmacy,
+              selected: pharmacy == _selectedPharmacy,
+              distanceText: pharmacy.distanceTextFrom(_kUserLocation),
+              onTap: () => _selectAndFly(pharmacy),
+              onNavigate: () =>
+                  _openGoogleMapsNavigation(pharmacy.lat, pharmacy.lng),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPharmacyBottomSheet(BuildContext context, _PharmacyData pharmacy) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: pharmacy.isOnDuty
+                        ? const Color(0xFFFFEEF0)
+                        : AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    pharmacy.isOnDuty
+                        ? Icons.nightlight_round
+                        : Icons.local_pharmacy,
+                    color: pharmacy.isOnDuty
+                        ? Colors.redAccent
+                        : AppColors.primaryDark,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        pharmacy.name,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        pharmacy.isOnDuty ? "Nöbetçi" : "Açık",
+                        style: TextStyle(
+                          color: pharmacy.isOnDuty
+                              ? Colors.redAccent
+                              : AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 16,
+                  color: AppColors.primaryDark,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    pharmacy.address,
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(
+                  Icons.phone_outlined,
+                  size: 16,
+                  color: AppColors.primaryDark,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  pharmacy.phone,
+                  style: const TextStyle(color: Colors.black54),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () =>
+                    _openGoogleMapsNavigation(pharmacy.lat, pharmacy.lng),
+                icon: const Icon(Icons.navigation),
+                label: const Text("Yol Tarifi Al"),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _MapSummary extends StatelessWidget {
-  final bool onlyDuty;
-  final int pharmacyCount;
-  final Position position;
+// ---------------------------------------------------------------------------
+// Harita kontrol butonu (zoom +/-  ve konum)
+// ---------------------------------------------------------------------------
+class _MapControlButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final String tooltip;
+  final Color? color;
 
-  const _MapSummary({
-    required this.onlyDuty,
-    required this.pharmacyCount,
-    required this.position,
+  const _MapControlButton({
+    required this.icon,
+    required this.onTap,
+    required this.tooltip,
+    this.color,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Icon(icon, size: 20, color: color ?? AppColors.navy),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Özet banner
+// ---------------------------------------------------------------------------
+class _SummaryBanner extends StatelessWidget {
+  final bool onlyDuty;
+  final int count;
+
+  const _SummaryBanner({required this.onlyDuty, required this.count});
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +566,7 @@ class _MapSummary extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "$pharmacyCount eczane bulundu",
+                  "$count eczane bulundu",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -218,11 +574,9 @@ class _MapSummary extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  onlyDuty
-                      ? "Konumuna göre nöbetçi eczaneler listeleniyor."
-                      : "Konumuna göre yakın eczaneler listeleniyor.",
-                  style: const TextStyle(color: Colors.white70),
+                const Text(
+                  "Konum: $_kUserAddress",
+                  style: TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
             ),
@@ -233,118 +587,90 @@ class _MapSummary extends StatelessWidget {
   }
 }
 
-class _MapPreview extends StatelessWidget {
-  final List<_Pharmacy> pharmacies;
-  final _Pharmacy? selectedPharmacy;
-  final ValueChanged<_Pharmacy> onSelected;
-
-  const _MapPreview({
-    required this.pharmacies,
-    required this.selectedPharmacy,
-    required this.onSelected,
-  });
+class _UserLocationMarker extends StatelessWidget {
+  const _UserLocationMarker();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 285,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEAF3EE),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.primaryLight),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _MapBackgroundPainter())),
-          const Align(
-            alignment: Alignment.center,
-            child: _CurrentLocationMarker(),
-          ),
-          ...pharmacies.map((pharmacy) {
-            final alignment = Alignment(
-              (pharmacy.longitudeOffset * 120).clamp(-0.88, 0.88),
-              (pharmacy.latitudeOffset * -120).clamp(-0.82, 0.82),
-            );
-            final selected = pharmacy == selectedPharmacy;
-
-            return Align(
-              alignment: alignment,
-              child: GestureDetector(
-                onTap: () => onSelected(pharmacy),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  width: selected ? 42 : 34,
-                  height: selected ? 42 : 34,
-                  decoration: BoxDecoration(
-                    color: pharmacy.isOnDuty ? Colors.redAccent : AppColors.primaryDark,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
-                    boxShadow: const [
-                      BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 3)),
-                    ],
-                  ),
-                  child: const Icon(Icons.local_pharmacy, color: Colors.white, size: 19),
+    return Center(
+      child: Container(
+        width: 54,
+        height: 54,
+        decoration: BoxDecoration(
+          color: AppColors.accent.withValues(alpha: 0.22),
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: AppColors.accent,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 3),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accent.withValues(alpha: 0.4),
+                  blurRadius: 6,
                 ),
-              ),
-            );
-          }),
-          if (selectedPharmacy != null)
-            Positioned(
-              left: 12,
-              right: 12,
-              bottom: 12,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      selectedPharmacy!.isOnDuty ? Icons.nightlight_round : Icons.local_pharmacy,
-                      color: selectedPharmacy!.isOnDuty ? Colors.redAccent : AppColors.primaryDark,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            selectedPharmacy!.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            "${selectedPharmacy!.distanceText} • ${selectedPharmacy!.statusText}",
-                            style: const TextStyle(fontSize: 12, color: Colors.black54),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              ],
             ),
-        ],
+          ),
+        ),
       ),
     );
   }
 }
 
+class _PharmacyMarker extends StatelessWidget {
+  final bool isOnDuty;
+  final bool isSelected;
+
+  const _PharmacyMarker({required this.isOnDuty, required this.isSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isOnDuty ? Colors.redAccent : AppColors.primary;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      child: Icon(
+        Icons.location_on,
+        color: color,
+        size: isSelected ? 46 : 36,
+        shadows: [Shadow(color: color.withValues(alpha: 0.4), blurRadius: 8)],
+      ),
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  final Color color;
+
+  const _LegendDot({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+  }
+}
+
 class _PharmacyCard extends StatelessWidget {
-  final _Pharmacy pharmacy;
+  final _PharmacyData pharmacy;
   final bool selected;
+  final String distanceText;
   final VoidCallback onTap;
+  final VoidCallback onNavigate;
 
   const _PharmacyCard({
     required this.pharmacy,
     required this.selected,
+    required this.distanceText,
     required this.onTap,
+    required this.onNavigate,
   });
 
   @override
@@ -356,7 +682,7 @@ class _PharmacyCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: selected ? AppColors.primary : Colors.grey.shade200,
-          width: selected ? 1.4 : 1,
+          width: selected ? 1.6 : 1,
         ),
       ),
       child: InkWell(
@@ -370,12 +696,18 @@ class _PharmacyCard extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: pharmacy.isOnDuty ? const Color(0xFFFFEEF0) : AppColors.primaryLight,
+                  color: pharmacy.isOnDuty
+                      ? const Color(0xFFFFEEF0)
+                      : AppColors.primaryLight,
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Icon(
-                  pharmacy.isOnDuty ? Icons.nightlight_round : Icons.local_pharmacy,
-                  color: pharmacy.isOnDuty ? Colors.redAccent : AppColors.primaryDark,
+                  pharmacy.isOnDuty
+                      ? Icons.nightlight_round
+                      : Icons.local_pharmacy,
+                  color: pharmacy.isOnDuty
+                      ? Colors.redAccent
+                      : AppColors.primaryDark,
                 ),
               ),
               const SizedBox(width: 12),
@@ -388,27 +720,91 @@ class _PharmacyCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             pharmacy.name,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        _StatusPill(pharmacy: pharmacy),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: pharmacy.isOnDuty
+                                ? const Color(0xFFFFEEF0)
+                                : AppColors.primaryLight,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            pharmacy.isOnDuty ? "Nöbetçi" : "Açık",
+                            style: TextStyle(
+                              color: pharmacy.isOnDuty
+                                  ? Colors.redAccent
+                                  : AppColors.primaryDark,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 5),
-                    Text(pharmacy.address, style: const TextStyle(color: Colors.black54)),
-                    const SizedBox(height: 7),
+                    const SizedBox(height: 4),
+                    Text(
+                      pharmacy.address,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.near_me_outlined, size: 16, color: AppColors.primaryDark),
-                        const SizedBox(width: 4),
-                        Text(pharmacy.distanceText),
-                        const SizedBox(width: 12),
-                        const Icon(Icons.phone_outlined, size: 16, color: AppColors.primaryDark),
-                        const SizedBox(width: 4),
-                        Expanded(child: Text(pharmacy.phone, overflow: TextOverflow.ellipsis)),
+                        const Icon(
+                          Icons.near_me_outlined,
+                          size: 14,
+                          color: AppColors.primaryDark,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          distanceText,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        const SizedBox(width: 10),
+                        const Icon(
+                          Icons.phone_outlined,
+                          size: 14,
+                          color: AppColors.primaryDark,
+                        ),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            pharmacy.phone,
+                            style: const TextStyle(fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: onNavigate,
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.navigation,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
             ],
@@ -417,182 +813,4 @@ class _PharmacyCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _StatusPill extends StatelessWidget {
-  final _Pharmacy pharmacy;
-
-  const _StatusPill({required this.pharmacy});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: pharmacy.isOnDuty ? const Color(0xFFFFEEF0) : AppColors.primaryLight,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        pharmacy.isOnDuty ? "Nöbetçi" : "Açık",
-        style: TextStyle(
-          color: pharmacy.isOnDuty ? Colors.redAccent : AppColors.primaryDark,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-}
-
-class _LocationError extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _LocationError({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.location_off_outlined, size: 72, color: AppColors.primaryDark),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text("Tekrar dene"),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CurrentLocationMarker extends StatelessWidget {
-  const _CurrentLocationMarker();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 54,
-      height: 54,
-      decoration: BoxDecoration(
-        color: AppColors.accent.withValues(alpha: 0.18),
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-            color: AppColors.accent,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 3),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MapBackgroundPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final roadPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.82)
-      ..strokeWidth = 18
-      ..strokeCap = StrokeCap.round;
-    final thinRoadPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.62)
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round;
-    final parkPaint = Paint()..color = const Color(0xFFD6ECDD);
-
-    canvas.drawCircle(Offset(size.width * 0.20, size.height * 0.20), 58, parkPaint);
-    canvas.drawCircle(Offset(size.width * 0.82, size.height * 0.28), 46, parkPaint);
-    canvas.drawCircle(Offset(size.width * 0.72, size.height * 0.78), 64, parkPaint);
-
-    canvas.drawLine(
-      Offset(size.width * 0.08, size.height * 0.72),
-      Offset(size.width * 0.92, size.height * 0.28),
-      roadPaint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 0.22, size.height * 0.05),
-      Offset(size.width * 0.66, size.height * 0.94),
-      roadPaint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 0.04, size.height * 0.35),
-      Offset(size.width * 0.94, size.height * 0.52),
-      thinRoadPaint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 0.36, size.height * 0.04),
-      Offset(size.width * 0.94, size.height * 0.86),
-      thinRoadPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _PharmacyTemplate {
-  final String name;
-  final String address;
-  final double latitudeOffset;
-  final double longitudeOffset;
-  final bool isOnDuty;
-
-  const _PharmacyTemplate(
-    this.name,
-    this.address,
-    this.latitudeOffset,
-    this.longitudeOffset,
-    this.isOnDuty,
-  );
-}
-
-class _Pharmacy {
-  final String name;
-  final String address;
-  final double latitude;
-  final double longitude;
-  final double latitudeOffset;
-  final double longitudeOffset;
-  final int distanceMeters;
-  final bool isOnDuty;
-  final String phone;
-
-  const _Pharmacy({
-    required this.name,
-    required this.address,
-    required this.latitude,
-    required this.longitude,
-    required this.latitudeOffset,
-    required this.longitudeOffset,
-    required this.distanceMeters,
-    required this.isOnDuty,
-    required this.phone,
-  });
-
-  String get distanceText {
-    if (distanceMeters >= 1000) {
-      return "${(distanceMeters / 1000).toStringAsFixed(1)} km";
-    }
-    return "$distanceMeters m";
-  }
-
-  String get statusText => isOnDuty ? "Gece açık" : "Gündüz açık";
 }
