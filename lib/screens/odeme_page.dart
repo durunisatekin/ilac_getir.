@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/medicine_data.dart';
 import '../models/cart_model.dart';
+import '../models/order_model.dart';
+import '../models/user_model.dart';
 import '../theme/app_colors.dart';
 import 'siparis_durum_page.dart';
 
@@ -82,16 +84,34 @@ class _OdemePageState extends State<OdemePage> {
     setState(() => hataMesaji = "");
 
     final prefs = await SharedPreferences.getInstance();
+    final orderModel = context.read<OrderModel>();
+    final user = context.read<UserModel>();
+    final userId = user.phone.isNotEmpty ? user.phone : "guest_${user.name}";
     final siparisNo = DateTime.now().millisecondsSinceEpoch.toString();
     final siparisUrunleri = cart.items
         .map((item) => "${item.name} x${item.quantity}")
         .toList();
+    final orderProducts = cart.items
+        .map(
+          (item) => {
+            "name": item.name,
+            "quantity": item.quantity,
+          },
+        )
+        .toList();
+    final totalPrice = cart.totalPrice;
 
     await _saveAddressInfo();
     await prefs.setString("siparisNo", siparisNo);
     await prefs.setInt("siparisZamani", DateTime.now().millisecondsSinceEpoch);
     await prefs.setStringList("siparisUrunleri", siparisUrunleri);
-    await prefs.setDouble("siparisToplam", cart.totalPrice);
+    await prefs.setDouble("siparisToplam", totalPrice);
+    orderModel.addOrder(
+      userId: userId,
+      products: orderProducts,
+      total: totalPrice,
+      status: "hazırlanıyor",
+    );
 
     cart.clear();
 

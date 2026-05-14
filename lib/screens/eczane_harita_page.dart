@@ -6,10 +6,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_colors.dart';
 
 // ---------------------------------------------------------------------------
-// Sabit başlangıç konumu: Ümraniye - İstiklal Mahallesi
+// Sabit baslangic konumu: Umraniye - Istiklal Mahallesi, Aleyna Sokak
 // ---------------------------------------------------------------------------
 const LatLng _kUserLocation = LatLng(41.02560, 29.09630);
-const String _kUserAddress = "İstiklal Mah., Ümraniye / İstanbul";
+const String _kUserAddress =
+    "Istiklal Mahallesi, Aleyna Sokak, Umraniye / Istanbul";
 
 // ---------------------------------------------------------------------------
 // Gerçek Ümraniye eczane verileri
@@ -150,17 +151,50 @@ class _PharmacyData {
 // ---------------------------------------------------------------------------
 // Navigasyon yardımcısı
 // ---------------------------------------------------------------------------
-Future<void> _openGoogleMapsNavigation(double lat, double lng) async {
-  final appUri = Uri.parse("google.navigation:q=$lat,$lng&mode=d");
-  final webUri = Uri.parse(
-    "https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving",
+Future<void> _openGoogleMapsNavigation(
+  BuildContext context,
+  _PharmacyData pharmacy,
+) async {
+  final encodedOrigin = Uri.encodeComponent(_kUserAddress);
+  final encodedDestination = Uri.encodeComponent(
+    "${pharmacy.name}, ${pharmacy.address}",
+  );
+  final webDirectionsUrl = Uri.parse(
+    "https://www.google.com/maps/dir/?api=1&origin=$encodedOrigin&destination=$encodedDestination&travelmode=driving",
+  );
+  final classicDirectionsUrl = Uri.parse(
+    "https://maps.google.com/maps?saddr=$encodedOrigin&daddr=$encodedDestination&dirflg=d",
+  );
+  final webSearchUrl = Uri.parse(
+    "https://www.google.com/maps/search/?api=1&query=$encodedDestination",
   );
 
-  if (await canLaunchUrl(appUri)) {
-    await launchUrl(appUri);
-  } else {
-    await launchUrl(webUri, mode: LaunchMode.externalApplication);
+  final urls = [
+    classicDirectionsUrl,
+    webDirectionsUrl,
+    webSearchUrl,
+    Uri.parse("google.navigation:q=$encodedDestination&mode=d"),
+    Uri.parse("geo:0,0?q=$encodedDestination"),
+  ];
+
+  for (final url in urls) {
+    try {
+      final opened = await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (opened) return;
+    } catch (_) {
+      // Siradaki Google Maps acma yontemini dene.
+    }
   }
+
+  if (!context.mounted) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        "${pharmacy.name} konumu acilamadi. Google Maps uygulamasini kontrol edin.",
+      ),
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -178,20 +212,14 @@ class EczaneHaritaPage extends StatefulWidget {
 class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
   late final MapController _mapController;
   _PharmacyData? _selectedPharmacy;
-  late final List<_PharmacyData> _pharmacies;
+  late List<_PharmacyData> _pharmacies;
   double _currentZoom = 14.5;
 
   @override
   void initState() {
     super.initState();
     _mapController = MapController();
-    _pharmacies = widget.sadeceNobetci
-        ? _kPharmacies.where((p) => p.isOnDuty).toList()
-        : (List.from(_kPharmacies)..sort(
-            (a, b) => a
-                .distanceMetersFrom(_kUserLocation)
-                .compareTo(b.distanceMetersFrom(_kUserLocation)),
-          ));
+    _pharmacies = _pharmaciesFor(_kUserLocation);
     _selectedPharmacy = _pharmacies.firstOrNull;
   }
 
@@ -225,6 +253,20 @@ class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
   void _goToMyLocation() {
     setState(() => _currentZoom = 14.5);
     _mapController.move(_kUserLocation, 14.5);
+  }
+
+  List<_PharmacyData> _pharmaciesFor(LatLng origin) {
+    final pharmacies = widget.sadeceNobetci
+        ? _kPharmacies.where((p) => p.isOnDuty).toList()
+        : List<_PharmacyData>.from(_kPharmacies);
+
+    pharmacies.sort(
+      (a, b) => a
+          .distanceMetersFrom(origin)
+          .compareTo(b.distanceMetersFrom(origin)),
+    );
+
+    return pharmacies;
   }
 
   @override
@@ -370,8 +412,7 @@ class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
               selected: pharmacy == _selectedPharmacy,
               distanceText: pharmacy.distanceTextFrom(_kUserLocation),
               onTap: () => _selectAndFly(pharmacy),
-              onNavigate: () =>
-                  _openGoogleMapsNavigation(pharmacy.lat, pharmacy.lng),
+              onNavigate: () => _openGoogleMapsNavigation(context, pharmacy),
             ),
           ),
         ],
@@ -473,8 +514,7 @@ class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () =>
-                    _openGoogleMapsNavigation(pharmacy.lat, pharmacy.lng),
+                onPressed: () => _openGoogleMapsNavigation(context, pharmacy),
                 icon: const Icon(Icons.navigation),
                 label: const Text("Yol Tarifi Al"),
               ),
