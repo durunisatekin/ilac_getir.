@@ -4,18 +4,18 @@ import '../data/medicine_data.dart';
 import '../models/cart_model.dart';
 import '../models/favorite_model.dart';
 import '../models/user_model.dart';
-import 'ilac_detay_page.dart';
+import 'medicine_detail_page.dart';
 
-class IlacListesi extends StatefulWidget {
+class MedicineListPage extends StatefulWidget {
   final String kategori;
 
-  const IlacListesi({super.key, required this.kategori});
+  const MedicineListPage({super.key, required this.kategori});
 
   @override
-  State<IlacListesi> createState() => _IlacListesiState();
+  State<MedicineListPage> createState() => _MedicineListPageState();
 }
 
-class _IlacListesiState extends State<IlacListesi> {
+class _MedicineListPageState extends State<MedicineListPage> {
   String search = "";
 
   @override
@@ -39,7 +39,7 @@ class _IlacListesiState extends State<IlacListesi> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          "$baslik",
+          baslik,
           style: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -101,14 +101,22 @@ class _IlacListesiState extends State<IlacListesi> {
                 itemBuilder: (context, index) {
                   final medicine = filteredMedicines[index];
                   final user = context.read<UserModel>();
-                  final userId = user.phone.isNotEmpty ? user.phone : "guest_${user.name}";
-                  final isFavorite = favorites.isFavorite(medicine["name"] as String, userId);
+                  final userId = user.phone.isNotEmpty
+                      ? user.phone
+                      : "guest_${user.name}";
+                  final isFavorite = favorites.isFavorite(
+                    medicine["name"] as String,
+                    userId,
+                  );
 
                   return ProductCard(
                     medicine: medicine,
                     isFavorite: isFavorite,
                     onFavorite: () {
-                      favorites.toggleFavorite(medicine["name"] as String, userId);
+                      favorites.toggleFavorite(
+                        medicine["name"] as String,
+                        userId,
+                      );
                     },
                     onAddToCart: () {
                       cart.addItem(medicine["name"], medicine["price"]);
@@ -124,7 +132,7 @@ class _IlacListesiState extends State<IlacListesi> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => IlacDetayPage(ilac: medicine),
+                          builder: (_) => MedicineDetailPage(ilac: medicine),
                         ),
                       );
                     },
@@ -263,7 +271,10 @@ class ProductCard extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.orange,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 4,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(6),
                               ),
@@ -349,7 +360,9 @@ class MedicineSearchDelegate extends SearchDelegate<String> {
   @override
   Widget buildResults(BuildContext context) {
     final results = medicines.where((medicine) {
-      return medicine["name"].toString().toLowerCase().contains(query.toLowerCase());
+      return medicine["name"].toString().toLowerCase().contains(
+        query.toLowerCase(),
+      );
     }).toList();
 
     return ListView.builder(
@@ -363,7 +376,7 @@ class MedicineSearchDelegate extends SearchDelegate<String> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => IlacDetayPage(ilac: medicine),
+                builder: (_) => MedicineDetailPage(ilac: medicine),
               ),
             );
           },
@@ -375,7 +388,9 @@ class MedicineSearchDelegate extends SearchDelegate<String> {
   @override
   Widget buildSuggestions(BuildContext context) {
     final suggestions = medicines.where((medicine) {
-      return medicine["name"].toString().toLowerCase().contains(query.toLowerCase());
+      return medicine["name"].toString().toLowerCase().contains(
+        query.toLowerCase(),
+      );
     }).toList();
 
     return ListView.builder(

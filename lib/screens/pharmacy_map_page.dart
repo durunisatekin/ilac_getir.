@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/app_colors.dart';
+import '../widgets/empty_state.dart';
 
 // ---------------------------------------------------------------------------
 // Sabit baslangic konumu: Umraniye - Istiklal Mahallesi, Aleyna Sokak
@@ -197,34 +198,57 @@ Future<void> _openGoogleMapsNavigation(
   );
 }
 
+Future<void> _callPharmacy(BuildContext context, _PharmacyData pharmacy) async {
+  final phoneUri = Uri(scheme: "tel", path: pharmacy.phone.replaceAll(" ", ""));
+
+  try {
+    final opened = await launchUrl(
+      phoneUri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (opened) return;
+  } catch (_) {}
+
+  if (!context.mounted) return;
+
+  ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: Text("${pharmacy.name} aranamadı.")));
+}
+
 // ---------------------------------------------------------------------------
 // Ana sayfa widget'ı
 // ---------------------------------------------------------------------------
-class EczaneHaritaPage extends StatefulWidget {
-  final bool sadeceNobetci;
+class PharmacyMapPage extends StatefulWidget {
+  final bool onlyDuty;
 
-  const EczaneHaritaPage({super.key, this.sadeceNobetci = false});
+  const PharmacyMapPage({super.key, this.onlyDuty = false});
 
   @override
-  State<EczaneHaritaPage> createState() => _EczaneHaritaPageState();
+  State<PharmacyMapPage> createState() => _PharmacyMapPageState();
 }
 
-class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
+class _PharmacyMapPageState extends State<PharmacyMapPage> {
   late final MapController _mapController;
+  late final TextEditingController _searchController;
   _PharmacyData? _selectedPharmacy;
   late List<_PharmacyData> _pharmacies;
   double _currentZoom = 14.5;
+  bool _showMap = true;
+  String _searchQuery = "";
 
   @override
   void initState() {
     super.initState();
     _mapController = MapController();
+    _searchController = TextEditingController();
     _pharmacies = _pharmaciesFor(_kUserLocation);
     _selectedPharmacy = _pharmacies.firstOrNull;
   }
 
   @override
   void dispose() {
+    _searchController.dispose();
     _mapController.dispose();
     super.dispose();
   }
@@ -234,8 +258,12 @@ class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
     setState(() {
       _selectedPharmacy = pharmacy;
       _currentZoom = 16.0;
+      _showMap = true;
     });
-    _mapController.move(LatLng(pharmacy.lat, pharmacy.lng), 16.0);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _mapController.move(pharmacy.latLng, 16.0);
+    });
   }
 
   void _zoomIn() {
@@ -256,24 +284,54 @@ class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
   }
 
   List<_PharmacyData> _pharmaciesFor(LatLng origin) {
-    final pharmacies = widget.sadeceNobetci
+    final pharmacies = widget.onlyDuty
         ? _kPharmacies.where((p) => p.isOnDuty).toList()
         : List<_PharmacyData>.from(_kPharmacies);
 
     pharmacies.sort(
-      (a, b) => a
-          .distanceMetersFrom(origin)
-          .compareTo(b.distanceMetersFrom(origin)),
+      (a, b) =>
+          a.distanceMetersFrom(origin).compareTo(b.distanceMetersFrom(origin)),
     );
 
     return pharmacies;
   }
 
+  List<_PharmacyData> get _visiblePharmacies {
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isEmpty) return _pharmacies;
+
+    return _pharmacies
+        .where(
+          (p) =>
+              p.name.toLowerCase().contains(query) ||
+              p.address.toLowerCase().contains(query) ||
+              p.phone.contains(query),
+        )
+        .toList();
+  }
+
+  void _updateSearch(String value) {
+    setState(() {
+      _searchQuery = value;
+      final visible = _visiblePharmacies;
+      if (visible.isEmpty) {
+        _selectedPharmacy = null;
+      } else if (_selectedPharmacy == null ||
+          !visible.contains(_selectedPharmacy)) {
+        _selectedPharmacy = visible.first;
+      }
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _updateSearch("");
+  }
+
   @override
   Widget build(BuildContext context) {
-    final title = widget.sadeceNobetci
-        ? "Nöbetçi Eczaneler"
-        : "Yakındaki Eczaneler";
+    final title = widget.onlyDuty ? "Nöbetçi Eczaneler" : "Yakındaki Eczaneler";
+    final visiblePharmacies = _visiblePharmacies;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -286,135 +344,83 @@ class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
         children: [
           _SummaryBanner(
-            onlyDuty: widget.sadeceNobetci,
-            count: _pharmacies.length,
+            onlyDuty: widget.onlyDuty,
+            count: visiblePharmacies.length,
+          ),
+          const SizedBox(height: 12),
+          _SearchField(
+            controller: _searchController,
+            onChanged: _updateSearch,
+            onClear: _clearSearch,
+          ),
+          const SizedBox(height: 10),
+          _ViewSwitch(
+            showMap: _showMap,
+            onChanged: (value) => setState(() => _showMap = value),
           ),
           const SizedBox(height: 12),
 
-          // Harita
-          ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: SizedBox(
-              height: 285,
-              child: Stack(
-                children: [
-                  FlutterMap(
-                    mapController: _mapController,
-                    options: MapOptions(
-                      initialCenter: _kUserLocation,
-                      initialZoom: _currentZoom,
-                      onMapEvent: (event) {
-                        if (event is MapEventMove) {
-                          _currentZoom = event.camera.zoom;
-                        }
-                      },
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                        userAgentPackageName: "com.example.ilac_getir",
-                      ),
-                      MarkerLayer(
-                        markers: [
-                          // Kullanıcı konumu marker'ı
-                          Marker(
-                            point: _kUserLocation,
-                            width: 54,
-                            height: 54,
-                            child: const _UserLocationMarker(),
-                          ),
-                          // Eczane marker'ları — her birinin koordinatı doğrudan kullanılıyor
-                          ..._pharmacies.map(
-                            (p) => Marker(
-                              point: LatLng(p.lat, p.lng),
-                              width: 46,
-                              height: 46,
-                              child: GestureDetector(
-                                onTap: () {
-                                  _selectAndFly(p);
-                                  _showPharmacyBottomSheet(context, p);
-                                },
-                                child: _PharmacyMarker(
-                                  isOnDuty: p.isOnDuty,
-                                  isSelected: _selectedPharmacy == p,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  // Zoom & konum kontrol butonları (sağ alt köşe)
-                  Positioned(
-                    right: 10,
-                    bottom: 10,
-                    child: Column(
-                      children: [
-                        _MapControlButton(
-                          icon: Icons.add,
-                          onTap: _zoomIn,
-                          tooltip: "Yakınlaştır",
-                        ),
-                        const SizedBox(height: 6),
-                        _MapControlButton(
-                          icon: Icons.remove,
-                          onTap: _zoomOut,
-                          tooltip: "Uzaklaştır",
-                        ),
-                        const SizedBox(height: 6),
-                        _MapControlButton(
-                          icon: Icons.my_location,
-                          onTap: _goToMyLocation,
-                          tooltip: "Konumuma git",
-                          color: AppColors.accent,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+          if (_showMap) ...[
+            _PharmacyMap(
+              mapController: _mapController,
+              currentZoom: _currentZoom,
+              pharmacies: visiblePharmacies,
+              selectedPharmacy: _selectedPharmacy,
+              onMapMove: (zoom) => _currentZoom = zoom,
+              onSelect: (pharmacy) {
+                _selectAndFly(pharmacy);
+                _showPharmacyBottomSheet(context, pharmacy);
+              },
+              onZoomIn: _zoomIn,
+              onZoomOut: _zoomOut,
+              onMyLocation: _goToMyLocation,
             ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Harita açıklaması
-          Row(
-            children: [
-              _LegendDot(color: AppColors.primary),
-              const SizedBox(width: 6),
-              const Text("Normal", style: TextStyle(fontSize: 12)),
-              const SizedBox(width: 16),
-              _LegendDot(color: Colors.redAccent),
-              const SizedBox(width: 6),
-              const Text("Nöbetçi", style: TextStyle(fontSize: 12)),
-              const SizedBox(width: 16),
-              _LegendDot(color: AppColors.accent),
-              const SizedBox(width: 6),
-              const Text("Konumun", style: TextStyle(fontSize: 12)),
-            ],
-          ),
+            const SizedBox(height: 8),
+            const _MapLegend(),
+            const SizedBox(height: 12),
+            if (_selectedPharmacy != null)
+              _SelectedPharmacyPanel(
+                pharmacy: _selectedPharmacy!,
+                distanceText: _selectedPharmacy!.distanceTextFrom(
+                  _kUserLocation,
+                ),
+                onCall: () => _callPharmacy(context, _selectedPharmacy!),
+                onNavigate: () =>
+                    _openGoogleMapsNavigation(context, _selectedPharmacy!),
+              ),
+          ],
 
           const SizedBox(height: 16),
           Text(
-            widget.sadeceNobetci
+            widget.onlyDuty
                 ? "Bu gece açık olanlar"
                 : "Konumuna en yakın eczaneler",
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
-          ..._pharmacies.map(
-            (pharmacy) => _PharmacyCard(
-              pharmacy: pharmacy,
-              selected: pharmacy == _selectedPharmacy,
-              distanceText: pharmacy.distanceTextFrom(_kUserLocation),
-              onTap: () => _selectAndFly(pharmacy),
-              onNavigate: () => _openGoogleMapsNavigation(context, pharmacy),
+          if (visiblePharmacies.isEmpty)
+            EmptyState(
+              icon: Icons.search_off,
+              title: "Sonuç bulunamadı",
+              message:
+                  "Eczane adı, mahalle veya telefon bilgisiyle tekrar ara.",
+              action: TextButton.icon(
+                onPressed: _clearSearch,
+                icon: const Icon(Icons.close),
+                label: const Text("Aramayı temizle"),
+              ),
+            )
+          else
+            ...visiblePharmacies.map(
+              (pharmacy) => _PharmacyCard(
+                pharmacy: pharmacy,
+                selected: pharmacy == _selectedPharmacy,
+                distanceText: pharmacy.distanceTextFrom(_kUserLocation),
+                onTap: () => _selectAndFly(pharmacy),
+                onCall: () => _callPharmacy(context, pharmacy),
+                onNavigate: () => _openGoogleMapsNavigation(context, pharmacy),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -511,16 +517,338 @@ class _EczaneHaritaPageState extends State<EczaneHaritaPage> {
               ],
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _openGoogleMapsNavigation(context, pharmacy),
-                icon: const Icon(Icons.navigation),
-                label: const Text("Yol Tarifi Al"),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _callPharmacy(context, pharmacy),
+                    icon: const Icon(Icons.phone),
+                    label: const Text("Ara"),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () =>
+                        _openGoogleMapsNavigation(context, pharmacy),
+                    icon: const Icon(Icons.navigation),
+                    label: const Text("Yol Tarifi"),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+
+  const _SearchField({
+    required this.controller,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: "Eczane, mahalle veya telefon ara",
+        prefixIcon: const Icon(Icons.search),
+        suffixIcon: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: controller,
+          builder: (context, value, _) {
+            if (value.text.isEmpty) return const SizedBox.shrink();
+            return IconButton(
+              tooltip: "Aramayı temizle",
+              onPressed: onClear,
+              icon: const Icon(Icons.close),
+            );
+          },
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+      ),
+    );
+  }
+}
+
+class _ViewSwitch extends StatelessWidget {
+  final bool showMap;
+  final ValueChanged<bool> onChanged;
+
+  const _ViewSwitch({required this.showMap, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return SegmentedButton<bool>(
+      segments: const [
+        ButtonSegment(
+          value: true,
+          icon: Icon(Icons.map_outlined),
+          label: Text("Harita"),
+        ),
+        ButtonSegment(
+          value: false,
+          icon: Icon(Icons.format_list_bulleted),
+          label: Text("Liste"),
+        ),
+      ],
+      selected: {showMap},
+      onSelectionChanged: (values) => onChanged(values.first),
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.primaryLight
+              : Colors.white,
+        ),
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.primaryDark
+              : AppColors.navy,
+        ),
+      ),
+    );
+  }
+}
+
+class _PharmacyMap extends StatelessWidget {
+  final MapController mapController;
+  final double currentZoom;
+  final List<_PharmacyData> pharmacies;
+  final _PharmacyData? selectedPharmacy;
+  final ValueChanged<double> onMapMove;
+  final ValueChanged<_PharmacyData> onSelect;
+  final VoidCallback onZoomIn;
+  final VoidCallback onZoomOut;
+  final VoidCallback onMyLocation;
+
+  const _PharmacyMap({
+    required this.mapController,
+    required this.currentZoom,
+    required this.pharmacies,
+    required this.selectedPharmacy,
+    required this.onMapMove,
+    required this.onSelect,
+    required this.onZoomIn,
+    required this.onZoomOut,
+    required this.onMyLocation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: SizedBox(
+        height: 300,
+        child: Stack(
+          children: [
+            FlutterMap(
+              mapController: mapController,
+              options: MapOptions(
+                initialCenter: _kUserLocation,
+                initialZoom: currentZoom,
+                onMapEvent: (event) {
+                  if (event is MapEventMove) {
+                    onMapMove(event.camera.zoom);
+                  }
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  userAgentPackageName: "com.example.ilac_getir",
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _kUserLocation,
+                      width: 54,
+                      height: 54,
+                      child: const _UserLocationMarker(),
+                    ),
+                    ...pharmacies.map(
+                      (p) => Marker(
+                        point: p.latLng,
+                        width: 46,
+                        height: 46,
+                        child: GestureDetector(
+                          onTap: () => onSelect(p),
+                          child: _PharmacyMarker(
+                            isOnDuty: p.isOnDuty,
+                            isSelected: selectedPharmacy == p,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Positioned(
+              left: 10,
+              top: 10,
+              child: _MapCountChip(count: pharmacies.length),
+            ),
+            Positioned(
+              right: 10,
+              bottom: 10,
+              child: Column(
+                children: [
+                  _MapControlButton(
+                    icon: Icons.add,
+                    onTap: onZoomIn,
+                    tooltip: "Yakınlaştır",
+                  ),
+                  const SizedBox(height: 6),
+                  _MapControlButton(
+                    icon: Icons.remove,
+                    onTap: onZoomOut,
+                    tooltip: "Uzaklaştır",
+                  ),
+                  const SizedBox(height: 6),
+                  _MapControlButton(
+                    icon: Icons.my_location,
+                    onTap: onMyLocation,
+                    tooltip: "Konumuma git",
+                    color: AppColors.accent,
+                  ),
+                ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MapCountChip extends StatelessWidget {
+  final int count;
+
+  const _MapCountChip({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        "$count sonuç",
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+class _MapLegend extends StatelessWidget {
+  const _MapLegend();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        _LegendDot(color: AppColors.primary),
+        SizedBox(width: 6),
+        Text("Normal", style: TextStyle(fontSize: 12)),
+        SizedBox(width: 16),
+        _LegendDot(color: Colors.redAccent),
+        SizedBox(width: 6),
+        Text("Nöbetçi", style: TextStyle(fontSize: 12)),
+        SizedBox(width: 16),
+        _LegendDot(color: AppColors.accent),
+        SizedBox(width: 6),
+        Text("Konumun", style: TextStyle(fontSize: 12)),
+      ],
+    );
+  }
+}
+
+class _SelectedPharmacyPanel extends StatelessWidget {
+  final _PharmacyData pharmacy;
+  final String distanceText;
+  final VoidCallback onCall;
+  final VoidCallback onNavigate;
+
+  const _SelectedPharmacyPanel({
+    required this.pharmacy,
+    required this.distanceText,
+    required this.onCall,
+    required this.onNavigate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primaryLight),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            pharmacy.isOnDuty ? Icons.nightlight_round : Icons.local_pharmacy,
+            color: pharmacy.isOnDuty ? Colors.redAccent : AppColors.primaryDark,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  pharmacy.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  "$distanceText uzaklıkta • ${pharmacy.isOnDuty ? "Nöbetçi" : "Açık"}",
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: "Ara",
+            onPressed: onCall,
+            icon: const Icon(Icons.phone_outlined),
+          ),
+          IconButton(
+            tooltip: "Yol tarifi al",
+            onPressed: onNavigate,
+            icon: const Icon(Icons.navigation_outlined),
+          ),
+        ],
       ),
     );
   }
@@ -703,6 +1031,7 @@ class _PharmacyCard extends StatelessWidget {
   final bool selected;
   final String distanceText;
   final VoidCallback onTap;
+  final VoidCallback onCall;
   final VoidCallback onNavigate;
 
   const _PharmacyCard({
@@ -710,6 +1039,7 @@ class _PharmacyCard extends StatelessWidget {
     required this.selected,
     required this.distanceText,
     required this.onTap,
+    required this.onCall,
     required this.onNavigate,
   });
 
@@ -831,24 +1161,58 @@ class _PharmacyCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              GestureDetector(
-                onTap: onNavigate,
-                child: Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
+              Column(
+                children: [
+                  _CardActionButton(
+                    icon: Icons.phone_outlined,
+                    color: AppColors.primaryDark,
+                    tooltip: "Ara",
+                    onTap: onCall,
+                  ),
+                  const SizedBox(height: 6),
+                  _CardActionButton(
+                    icon: Icons.navigation,
                     color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(12),
+                    tooltip: "Yol tarifi al",
+                    onTap: onNavigate,
                   ),
-                  child: const Icon(
-                    Icons.navigation,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
+                ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CardActionButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  const _CardActionButton({
+    required this.icon,
+    required this.color,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: Colors.white, size: 19),
         ),
       ),
     );

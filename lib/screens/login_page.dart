@@ -158,8 +158,6 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
       backgroundColor: AppColors.navy,
       body: SafeArea(
@@ -193,14 +191,15 @@ class _LoginPageState extends State<LoginPage>
                           child: Image.asset(
                             "assets/images/dvita_logo.png",
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: AppColors.primary,
-                              child: const Icon(
-                                Icons.local_pharmacy,
-                                color: Colors.white,
-                                size: 52,
-                              ),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  color: AppColors.primary,
+                                  child: const Icon(
+                                    Icons.local_pharmacy,
+                                    color: Colors.white,
+                                    size: 52,
+                                  ),
+                                ),
                           ),
                         ),
                       ),

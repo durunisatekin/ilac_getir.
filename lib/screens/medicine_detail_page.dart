@@ -5,10 +5,10 @@ import '../models/favorite_model.dart';
 import '../models/user_model.dart';
 import '../theme/app_colors.dart';
 
-class IlacDetayPage extends StatelessWidget {
+class MedicineDetailPage extends StatelessWidget {
   final Map<String, dynamic> ilac;
 
-  const IlacDetayPage({super.key, required this.ilac});
+  const MedicineDetailPage({super.key, required this.ilac});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +17,11 @@ class IlacDetayPage extends StatelessWidget {
     final user = context.read<UserModel>();
     final userId = user.phone.isNotEmpty ? user.phone : "guest_${user.name}";
     final isFavorite = favorites.isFavorite(ilac["name"], userId);
+    final price = (ilac["price"] as num).toDouble();
+    final originalPrice = (ilac["originalPrice"] as num?)?.toDouble();
+    final discountPercent = ilac["discountPercent"] as int?;
+    final campaignLabel = ilac["campaignLabel"] as String?;
+    final hasDiscount = originalPrice != null && originalPrice > price;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -72,14 +77,36 @@ class IlacDetayPage extends StatelessWidget {
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(
-              "${ilac["price"]} TL",
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Text(
+                  "${price.toStringAsFixed(2)} TL",
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (hasDiscount) ...[
+                  const SizedBox(width: 10),
+                  Text(
+                    "${originalPrice!.toStringAsFixed(2)} TL",
+                    style: const TextStyle(
+                      color: Colors.black45,
+                      decoration: TextDecoration.lineThrough,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ],
             ),
+            if (hasDiscount) ...[
+              const SizedBox(height: 8),
+              _DiscountNotice(
+                discountPercent: discountPercent,
+                saving: originalPrice! - price,
+              ),
+            ],
             const SizedBox(height: 20),
             const Text(
               "Açıklama",
@@ -107,7 +134,13 @@ class IlacDetayPage extends StatelessWidget {
                   padding: const EdgeInsets.all(14),
                 ),
                 onPressed: () {
-                  cart.addItem(ilac["name"], ilac["price"]);
+                  cart.addItem(
+                    ilac["name"],
+                    price,
+                    originalPrice: hasDiscount ? originalPrice : null,
+                    discountPercent: discountPercent,
+                    campaignLabel: campaignLabel,
+                  );
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Sepete eklendi")),
                   );
@@ -118,6 +151,44 @@ class IlacDetayPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DiscountNotice extends StatelessWidget {
+  final int? discountPercent;
+  final double saving;
+
+  const _DiscountNotice({required this.discountPercent, required this.saving});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = discountPercent == null
+        ? "Kampanya uygulandı"
+        : "%$discountPercent kampanya uygulandı";
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade100),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.local_offer_outlined, color: Colors.green, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            "$label, ${saving.toStringAsFixed(2)} TL kazanç",
+            style: const TextStyle(
+              color: Colors.green,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }

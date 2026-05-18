@@ -4,14 +4,14 @@ import '../models/order_model.dart';
 import '../models/user_model.dart';
 import '../theme/app_colors.dart';
 
-class SiparisGecmisiPage extends StatefulWidget {
-  const SiparisGecmisiPage({super.key});
+class OrderHistoryPage extends StatefulWidget {
+  const OrderHistoryPage({super.key});
 
   @override
-  State<SiparisGecmisiPage> createState() => _SiparisGecmisiPageState();
+  State<OrderHistoryPage> createState() => _OrderHistoryPageState();
 }
 
-class _SiparisGecmisiPageState extends State<SiparisGecmisiPage> {
+class _OrderHistoryPageState extends State<OrderHistoryPage> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<UserModel>();
@@ -50,11 +50,7 @@ class _SiparisGecmisiPageState extends State<SiparisGecmisiPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.shopping_bag_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.shopping_bag_outlined, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             "Henüz siparişiniz bulunmuyor",
@@ -67,10 +63,7 @@ class _SiparisGecmisiPageState extends State<SiparisGecmisiPage> {
           const SizedBox(height: 8),
           Text(
             "Hemen alışverişe başlayın!",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
@@ -93,7 +86,7 @@ class _SiparisGecmisiPageState extends State<SiparisGecmisiPage> {
   Widget _buildOrderCard(Map<String, dynamic> order) {
     final date = DateTime.fromMillisecondsSinceEpoch(order["timestamp"]);
     final formattedDate = "${date.day}/${date.month}/${date.year}";
-    
+
     Color statusColor;
     IconData statusIcon;
     switch (order["status"]) {
@@ -143,7 +136,10 @@ class _SiparisGecmisiPageState extends State<SiparisGecmisiPage> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
@@ -169,26 +165,17 @@ class _SiparisGecmisiPageState extends State<SiparisGecmisiPage> {
             const SizedBox(height: 8),
             Text(
               formattedDate,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
             const SizedBox(height: 12),
             Text(
               "Ürünler:",
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             ),
             const SizedBox(height: 4),
             Text(
               order["products"],
-              style: TextStyle(
-                color: Colors.grey[700],
-                fontSize: 13,
-              ),
+              style: TextStyle(color: Colors.grey[700], fontSize: 13),
             ),
             const SizedBox(height: 12),
             Row(

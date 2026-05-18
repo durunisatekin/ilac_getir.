@@ -4,8 +4,8 @@ import '../data/medicine_data.dart';
 import '../models/cart_model.dart';
 import '../theme/app_colors.dart';
 
-class SepetPage extends StatelessWidget {
-  const SepetPage({super.key});
+class CartPage extends StatelessWidget {
+  const CartPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +29,10 @@ class SepetPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 ...cart.items.map((item) => _CartItemCard(item: item)),
+                if (cart.totalDiscount > 0) ...[
+                  const SizedBox(height: 6),
+                  _DiscountSummary(totalDiscount: cart.totalDiscount),
+                ],
               ],
             ),
       bottomNavigationBar: SafeArea(
@@ -53,6 +57,15 @@ class SepetPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       const Text("Toplam"),
+                      if (cart.totalDiscount > 0)
+                        Text(
+                          "${cart.totalDiscount.toStringAsFixed(2)} TL indirim",
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       Text(
                         "${cart.totalPrice.toStringAsFixed(2)} TL",
                         style: const TextStyle(
@@ -122,6 +135,9 @@ class _CartItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cart = context.read<Cart>();
     final image = medicine?["image"] as String?;
+    final originalLineTotal = item.originalPrice == null
+        ? null
+        : item.originalPrice! * item.quantity;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -149,7 +165,10 @@ class _CartItemCard extends StatelessWidget {
                       image,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.medication, color: AppColors.primaryDark);
+                        return const Icon(
+                          Icons.medication,
+                          color: AppColors.primaryDark,
+                        );
                       },
                     ),
             ),
@@ -160,13 +179,33 @@ class _CartItemCard extends StatelessWidget {
                 children: [
                   Text(
                     item.name,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     "${item.price.toStringAsFixed(2)} TL",
                     style: const TextStyle(color: Colors.black54),
                   ),
+                  if (item.hasDiscount) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        _DiscountBadge(percent: item.discountPercent!),
+                        const SizedBox(width: 6),
+                        Text(
+                          "${item.originalPrice!.toStringAsFixed(2)} TL",
+                          style: const TextStyle(
+                            color: Colors.black45,
+                            fontSize: 12,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 10),
                   Row(
                     children: [
@@ -190,14 +229,86 @@ class _CartItemCard extends StatelessWidget {
                 ],
               ),
             ),
-            Text(
-              "${(item.price * item.quantity).toStringAsFixed(0)} TL",
-              style: const TextStyle(
-                color: AppColors.primaryDark,
-                fontWeight: FontWeight.bold,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (originalLineTotal != null && item.hasDiscount)
+                  Text(
+                    "${originalLineTotal.toStringAsFixed(0)} TL",
+                    style: const TextStyle(
+                      color: Colors.black38,
+                      fontSize: 12,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
+                Text(
+                  "${(item.price * item.quantity).toStringAsFixed(0)} TL",
+                  style: const TextStyle(
+                    color: AppColors.primaryDark,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DiscountSummary extends StatelessWidget {
+  final double totalDiscount;
+
+  const _DiscountSummary({required this.totalDiscount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.green.shade100),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.local_offer_outlined, color: Colors.green),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              "Kampanyalı ürünlerden ${totalDiscount.toStringAsFixed(2)} TL kazandın",
+              style: const TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DiscountBadge extends StatelessWidget {
+  final int percent;
+
+  const _DiscountBadge({required this.percent});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.green,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        "%$percent indirim",
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/user_model.dart';
 import '../theme/app_colors.dart';
 import 'login_page.dart';
-import 'recetelerim_page.dart';
-import 'siparis_durum_page.dart';
+import 'prescriptions_page.dart';
+import 'order_status_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -89,7 +89,7 @@ class ProfilePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const RecetelerimPage()),
+                  MaterialPageRoute(builder: (_) => const PrescriptionsPage()),
                 );
               },
             ),
@@ -108,7 +108,7 @@ class ProfilePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const SiparisDurumPage()),
+                  MaterialPageRoute(builder: (_) => const OrderStatusPage()),
                 );
               },
             ),

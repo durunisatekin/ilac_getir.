@@ -11,7 +11,7 @@ class OrderModel extends ChangeNotifier {
   Future<void> loadOrders() async {
     final prefs = await SharedPreferences.getInstance();
     _orders.clear();
-    
+
     // Kullanıcı bazlı siparişleri yükle
     final ordersJson = prefs.getStringList("userOrders") ?? [];
     for (final orderJson in ordersJson) {
@@ -40,21 +40,24 @@ class OrderModel extends ChangeNotifier {
         });
       }
     }
-    
+
     // Tarihe göre sırala
     _orders.sort((a, b) => b["timestamp"].compareTo(a["timestamp"]));
-    
+
     notifyListeners();
   }
 
   Future<void> saveOrders() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Kullanıcı bazlı siparişleri kaydet
-    final ordersJson = _orders.map((order) => 
-      "${order["orderId"]}|${order["userId"]}|${order["timestamp"]}|${order["products"]}|${order["total"]}|${order["status"]}"
-    ).toList();
-    
+    final ordersJson = _orders
+        .map(
+          (order) =>
+              "${order["orderId"]}|${order["userId"]}|${order["timestamp"]}|${order["products"]}|${order["total"]}|${order["status"]}",
+        )
+        .toList();
+
     await prefs.setStringList("userOrders", ordersJson);
   }
 
@@ -68,7 +71,9 @@ class OrderModel extends ChangeNotifier {
       "orderId": "ORD_${DateTime.now().millisecondsSinceEpoch}",
       "userId": userId,
       "timestamp": DateTime.now().millisecondsSinceEpoch,
-      "products": products.map((p) => "${p["name"]} (${p["quantity"]})").join(", "),
+      "products": products
+          .map((p) => "${p["name"]} (${p["quantity"]})")
+          .join(", "),
       "total": total,
       "status": status,
     };

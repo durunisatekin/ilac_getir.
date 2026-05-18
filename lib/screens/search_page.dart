@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/medicine_data.dart';
-import 'ilac_detay_page.dart';
-import 'ilac_listesi.dart';
+import 'medicine_detail_page.dart';
+import 'medicine_list_page.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/price_text.dart';
 
@@ -107,7 +107,7 @@ class _MedicineResult extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => IlacDetayPage(ilac: medicine)),
+          MaterialPageRoute(builder: (_) => MedicineDetailPage(ilac: medicine)),
         );
       },
       child: Container(
@@ -189,7 +189,7 @@ class _CategoryResult extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => IlacListesi(kategori: category["type"]),
+            builder: (_) => MedicineListPage(kategori: category["type"]),
           ),
         );
       },

@@ -21,12 +21,14 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(title, style: theme.textTheme.titleLarge?.copyWith(fontSize: 20)),
+            child: Text(
+              title,
+              style: theme.textTheme.titleLarge?.copyWith(fontSize: 20),
+            ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );
   }
 }
-

@@ -3,13 +3,14 @@ import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
 import '../models/user_model.dart';
 import '../theme/app_colors.dart';
+import 'campaign_products_page.dart';
 import 'favorites_page.dart';
-import 'ilac_listesi.dart';
+import 'medicine_list_page.dart';
 import 'login_page.dart';
 import 'notifications_page.dart';
 import 'profile_page.dart';
 import 'search_page.dart';
-import 'siparis_durum_page.dart';
+import 'order_status_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -65,6 +66,7 @@ class _DashboardPageState extends State<DashboardPage> {
     {
       "title": "Hızlı Teslimat",
       "text": "30 dakikada kapında",
+      "type": "fast_delivery",
       "icon": Icons.local_shipping,
       "color": const Color(0xFFFF6B35),
       "gradient": [const Color(0xFFFF6B35), const Color(0xFFF7931E)],
@@ -72,6 +74,7 @@ class _DashboardPageState extends State<DashboardPage> {
     {
       "title": "İndirim Fırsatları",
       "text": "%50'ye varan indirimler",
+      "type": "discounts",
       "icon": Icons.local_offer,
       "color": const Color(0xFFE91E63),
       "gradient": [const Color(0xFFE91E63), const Color(0xFF9C27B0)],
@@ -79,6 +82,7 @@ class _DashboardPageState extends State<DashboardPage> {
     {
       "title": "Dermokozmetik",
       "text": "En çok satılan ürünler",
+      "type": "dermo",
       "icon": Icons.face,
       "color": const Color(0xFF9C27B0),
       "gradient": [const Color(0xFF9C27B0), const Color(0xFF673AB7)],
@@ -178,65 +182,10 @@ class _DashboardPageState extends State<DashboardPage> {
               itemBuilder: (context, index) {
                 final campaign = campaigns[index];
 
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: campaign["gradient"],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: campaign["color"].withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              campaign["title"],
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              campaign["text"],
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.5),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          campaign["icon"],
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                      ),
-                    ],
-                  ),
+                return _CampaignCard(
+                  campaign: campaign,
+                  onTap: () =>
+                      openPage(CampaignProductsPage(campaign: campaign)),
                 );
               },
             ),
@@ -287,7 +236,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 _QuickAction(
                   icon: Icons.local_shipping_outlined,
                   title: "Sipariş Durumu",
-                  onTap: () => openPage(const SiparisDurumPage()),
+                  onTap: () => openPage(const OrderStatusPage()),
                 ),
               ],
             ),
@@ -310,7 +259,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                 return GestureDetector(
                   onTap: () =>
-                      openPage(IlacListesi(kategori: kategori["type"])),
+                      openPage(MedicineListPage(kategori: kategori["type"])),
                   child: Container(
                     width: 100,
                     margin: const EdgeInsets.only(right: 10),
@@ -412,6 +361,112 @@ class _DashboardPageState extends State<DashboardPage> {
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CampaignCard extends StatelessWidget {
+  final Map<String, dynamic> campaign;
+  final VoidCallback onTap;
+
+  const _CampaignCard({required this.campaign, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Ink(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: campaign["gradient"],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: campaign["color"].withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        campaign["title"],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        campaign["text"],
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.82),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Ürünleri gör",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(campaign["icon"], color: Colors.white, size: 40),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

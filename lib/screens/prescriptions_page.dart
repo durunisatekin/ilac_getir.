@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 
-class RecetelerimPage extends StatefulWidget {
-  const RecetelerimPage({super.key});
+class PrescriptionsPage extends StatefulWidget {
+  const PrescriptionsPage({super.key});
 
   @override
-  State<RecetelerimPage> createState() => _RecetelerimPageState();
+  State<PrescriptionsPage> createState() => _PrescriptionsPageState();
 }
 
-class _RecetelerimPageState extends State<RecetelerimPage> {
+class _PrescriptionsPageState extends State<PrescriptionsPage> {
   static const String _kayitliTc = "11111111111";
   static const String _kayitliReceteKodu = "A0X24";
 

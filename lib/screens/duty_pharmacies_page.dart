@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
-import 'eczane_harita_page.dart';
+import 'pharmacy_map_page.dart';
 
 class DutyPharmaciesPage extends StatelessWidget {
   const DutyPharmaciesPage({super.key});
@@ -93,7 +93,7 @@ class DutyPharmaciesPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const EczaneHaritaPage(sadeceNobetci: true),
+                      builder: (_) => const PharmacyMapPage(onlyDuty: true),
                     ),
                   );
                 },

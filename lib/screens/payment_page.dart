@@ -7,16 +7,16 @@ import '../models/cart_model.dart';
 import '../models/order_model.dart';
 import '../models/user_model.dart';
 import '../theme/app_colors.dart';
-import 'siparis_durum_page.dart';
+import 'order_status_page.dart';
 
-class OdemePage extends StatefulWidget {
-  const OdemePage({super.key});
+class PaymentPage extends StatefulWidget {
+  const PaymentPage({super.key});
 
   @override
-  State<OdemePage> createState() => _OdemePageState();
+  State<PaymentPage> createState() => _PaymentPageState();
 }
 
-class _OdemePageState extends State<OdemePage> {
+class _PaymentPageState extends State<PaymentPage> {
   final _formKey = GlobalKey<FormState>();
   final kartController = TextEditingController();
   final tarihController = TextEditingController();
@@ -68,6 +68,8 @@ class _OdemePageState extends State<OdemePage> {
 
   Future<void> odemeyiTamamla() async {
     final cart = context.read<Cart>();
+    final orderModel = context.read<OrderModel>();
+    final user = context.read<UserModel>();
 
     if (cart.items.isEmpty) {
       setState(() => hataMesaji = "Sepetiniz boş");
@@ -84,20 +86,13 @@ class _OdemePageState extends State<OdemePage> {
     setState(() => hataMesaji = "");
 
     final prefs = await SharedPreferences.getInstance();
-    final orderModel = context.read<OrderModel>();
-    final user = context.read<UserModel>();
     final userId = user.phone.isNotEmpty ? user.phone : "guest_${user.name}";
     final siparisNo = DateTime.now().millisecondsSinceEpoch.toString();
     final siparisUrunleri = cart.items
         .map((item) => "${item.name} x${item.quantity}")
         .toList();
     final orderProducts = cart.items
-        .map(
-          (item) => {
-            "name": item.name,
-            "quantity": item.quantity,
-          },
-        )
+        .map((item) => {"name": item.name, "quantity": item.quantity})
         .toList();
     final totalPrice = cart.totalPrice;
 
@@ -119,7 +114,7 @@ class _OdemePageState extends State<OdemePage> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const SiparisDurumPage()),
+      MaterialPageRoute(builder: (_) => const OrderStatusPage()),
     );
   }
 
@@ -225,6 +220,10 @@ class _OdemePageState extends State<OdemePage> {
               ),
             const SizedBox(height: 24),
             _TotalCard(total: cart.totalPrice),
+            if (cart.totalDiscount > 0) ...[
+              const SizedBox(height: 10),
+              _PaymentDiscountSummary(totalDiscount: cart.totalDiscount),
+            ],
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -260,6 +259,9 @@ class _PaymentItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final image = medicine?["image"] as String?;
+    final originalLineTotal = item.originalPrice == null
+        ? null
+        : item.originalPrice! * item.quantity;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -284,7 +286,7 @@ class _PaymentItemCard extends StatelessWidget {
                 : Image.asset(
                     image,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Icon(
+                    errorBuilder: (context, error, stackTrace) => const Icon(
                       Icons.medication,
                       color: AppColors.primaryDark,
                     ),
@@ -307,17 +309,68 @@ class _PaymentItemCard extends StatelessWidget {
                   "${item.price.toStringAsFixed(2)} TL × ${item.quantity}",
                   style: const TextStyle(color: Colors.black54, fontSize: 13),
                 ),
+                if (item.hasDiscount) ...[
+                  const SizedBox(height: 5),
+                  Text(
+                    "%${item.discountPercent} kampanya uygulandı",
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-          Text(
-            "${(item.price * item.quantity).toStringAsFixed(2)} TL",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryDark,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (originalLineTotal != null && item.hasDiscount)
+                Text(
+                  "${originalLineTotal.toStringAsFixed(2)} TL",
+                  style: const TextStyle(
+                    color: Colors.black38,
+                    fontSize: 12,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+                ),
+              Text(
+                "${(item.price * item.quantity).toStringAsFixed(2)} TL",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryDark,
+                ),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PaymentDiscountSummary extends StatelessWidget {
+  final double totalDiscount;
+
+  const _PaymentDiscountSummary({required this.totalDiscount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.green.shade100),
+      ),
+      child: Text(
+        "Kampanya indirimi: ${totalDiscount.toStringAsFixed(2)} TL",
+        style: const TextStyle(
+          color: Colors.green,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -462,8 +515,9 @@ class _CardPaymentForm extends StatelessWidget {
                   TarihFormatter(),
                 ],
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty)
+                  if (value == null || value.trim().isEmpty) {
                     return "Tarih gerekli";
+                  }
                   if (!RegExp(r'^\d{2}/\d{2}$').hasMatch(value)) {
                     return "AA/YY formatında girin";
                   }
@@ -487,8 +541,9 @@ class _CardPaymentForm extends StatelessWidget {
                   LengthLimitingTextInputFormatter(3),
                 ],
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty)
+                  if (value == null || value.trim().isEmpty) {
                     return "CVV gerekli";
+                  }
                   if (value.length != 3) return "CVV 3 haneli olmalı";
                   return null;
                 },

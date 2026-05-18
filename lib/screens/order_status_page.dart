@@ -8,14 +8,14 @@ import '../models/user_model.dart';
 import '../theme/app_colors.dart';
 import '../widgets/empty_state.dart';
 
-class SiparisDurumPage extends StatefulWidget {
-  const SiparisDurumPage({super.key});
+class OrderStatusPage extends StatefulWidget {
+  const OrderStatusPage({super.key});
 
   @override
-  State<SiparisDurumPage> createState() => _SiparisDurumPageState();
+  State<OrderStatusPage> createState() => _OrderStatusPageState();
 }
 
-class _SiparisDurumPageState extends State<SiparisDurumPage> {
+class _OrderStatusPageState extends State<OrderStatusPage> {
   Timer? timer;
   bool yukleniyor = true;
   bool siparisKaydedildi = false;
